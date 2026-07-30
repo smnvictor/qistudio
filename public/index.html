@@ -205,6 +205,14 @@
   <button class="btn ghost" id="cancelBtn">再看看</button>
 </div></div>
 
+<div class="sheet" id="asheet" hidden><div class="in">
+  <h3>管理登录</h3>
+  <label>密码</label><input id="aPwd" type="password" autocomplete="current-password">
+  <div class="msg" id="aMsg" hidden></div>
+  <button class="btn" id="aLogin">进入</button>
+  <button class="btn ghost" id="aCancel">取消</button>
+</div></div>
+
 <button id="adminBtn" aria-label="管理">·</button>
 
 <!-- ========== 设置区（只有这里需要改） ========== -->
@@ -230,7 +238,6 @@
 <script>
 const CFG=JSON.parse(document.getElementById("cfg").textContent);
 const WECHAT=CFG.wechat, MONTHS_AHEAD=CFG.monthsAhead, ADDR=CFG.addr, RULES=CFG.rules, KIND=CFG.kind;
-const ADMIN_CODE="qistudio";
 
 const CN=["日","一","二","三","四","五","六"];
 const today=new Date(); today.setHours(0,0,0,0);
@@ -488,11 +495,24 @@ async function go(){selDay=null;picked=null;await load(mkey(view));
 
 document.getElementById("adminBtn").onclick=()=>{
   if(admin) return;
-  if(prompt("管理密码")===ADMIN_CODE){admin=true;document.getElementById("abar").hidden=false;
-    document.getElementById("bar").classList.remove("on");go();}
+  document.getElementById("aPwd").value="";
+  document.getElementById("aMsg").hidden=true;
+  document.getElementById("asheet").hidden=false;
 };
-document.getElementById("quitBtn").onclick=()=>{admin=false;editMode=false;
-  document.getElementById("abar").hidden=true;go();};
+document.getElementById("aCancel").onclick=()=>document.getElementById("asheet").hidden=true;
+document.getElementById("aLogin").onclick=async()=>{
+  const r=await fetch("/api/admin/login",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({password:document.getElementById("aPwd").value})}).catch(()=>null);
+  if(!r||!r.ok){const e=document.getElementById("aMsg");e.textContent="密码不对";e.hidden=false;return;}
+  document.getElementById("asheet").hidden=true;
+  admin=true; document.getElementById("abar").hidden=false;
+  document.getElementById("bar").classList.remove("on"); go();
+};
+document.getElementById("quitBtn").onclick=async()=>{
+  await fetch("/api/admin/logout",{method:"POST"}).catch(()=>{});
+  admin=false; editMode=false;
+  document.getElementById("abar").hidden=true; go();
+};
 document.getElementById("editBtn").onclick=function(){
   editMode=!editMode; this.textContent=editMode?"✓ 点时段开关":"关闭时段";
 };
@@ -503,5 +523,9 @@ document.getElementById("offBtn").onclick=async()=>{
 };
 
 document.getElementById("wxid").textContent=WECHAT;
-(async()=>{await loadMine();await go();})();
+(async()=>{
+  try{admin=(await (await fetch("/api/admin/session")).json()).admin;}catch(e){}
+  if(admin) document.getElementById("abar").hidden=false;
+  await loadMine(); await go();
+})();
 </script>

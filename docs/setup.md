@@ -91,7 +91,19 @@ Sur https://dash.cloudflare.com :
 
 Le binding D1 `DB` vient de `wrangler.toml` et n'est pas à créer dans le dashboard.
 
-## 8. Vérification
+## 8. Secrets
+
+```
+npx wrangler@latest pages secret put ADMIN_PASSWORD --project-name=qistudio
+```
+
+Saisir le mot de passe de Qizhi à l'invite. Puis redéployer pour que le secret soit visible des Functions :
+
+```
+git commit --allow-empty -m "secrets" && git push origin main
+```
+
+## 9. Vérification
 
 ```
 curl https://qistudio.pages.dev/api/health
@@ -103,7 +115,9 @@ Attendu : `{"bookings":0}`, puis `{"bookings":[],"exceptions":[]}`, puis `bookin
 
 Ouvrir https://qistudio.pages.dev : le calendrier du mois s'affiche, tous les créneaux disponibles. Choisir un créneau, remplir le formulaire, soumettre : le créneau passe en 审核中 et la demande apparaît dans 我的申请.
 
-## 9. Déploiements suivants
+Le point en bas à droite de la page ouvre la connexion admin. Le mot de passe est celui posé en section 8.
+
+## 10. Déploiements suivants
 
 ```
 git push origin main

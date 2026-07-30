@@ -153,7 +153,6 @@
   <span id="pendCount">管理模式</span>
   <button id="offBtn">当天休息</button>
   <button id="editBtn">关闭时段</button>
-  <button id="icsAll">导出本月日历</button>
   <button id="quitBtn">退出</button>
 </div>
 
@@ -455,52 +454,20 @@ function renderInbox(){
        '<button class="warn" data-a="declined" data-i="'+r.id+'">拒绝</button>';
     if(r.status==="approved") h+='<button class="pri" data-a="confirmed" data-i="'+r.id+'">定金已收，确认</button>'+
        '<button class="warn" data-a="cancelled" data-i="'+r.id+'">取消</button>';
-    if(r.status==="confirmed") h+='<button data-a="ics" data-i="'+r.id+'">加入日历</button>'+
-       '<button class="warn" data-a="cancelled" data-i="'+r.id+'">取消</button>';
+    if(r.status==="confirmed") h+='<button class="warn" data-a="cancelled" data-i="'+r.id+'">取消</button>';
     h+='</div></div>';
   });
   box.innerHTML=h;
   box.querySelectorAll("[data-a]").forEach(b=>{
     b.onclick=async()=>{
       const a=b.dataset.a, r=inbox.find(x=>x.id===b.dataset.i);
-      if(a==="ics") return downloadICS([r]);
       if((a==="declined"||a==="cancelled")&&!await ask("确定要取消 "+r.name+" 的预约吗？")) return;
-      const res=await fetch("/api/admin/booking/"+r.id+"/status",{method:"POST",
+      await fetch("/api/admin/booking/"+r.id+"/status",{method:"POST",
         headers:{"Content-Type":"application/json"},body:JSON.stringify({status:a})}).catch(()=>null);
-      if(a==="confirmed"&&res&&res.ok) downloadICS([r]);
       await go();
     };
   });
 }
-
-/* ---------- ICS 导出 ---------- */
-function icsEsc(s){return String(s||"").replace(/([,;\\])/g,"\\$1").replace(/\n/g,"\\n");}
-function stamp(d,t){return d.replace(/-/g,"")+"T"+t.replace(":","")+"00";}
-function downloadICS(list){
-  let out="BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Qistudio Paris//Booking//CN\r\nCALSCALE:GREGORIAN\r\n";
-  list.forEach(r=>{
-    const info=KIND[r.k];
-    out+="BEGIN:VEVENT\r\nUID:"+r.id+"@qistudio\r\n"+
-      "DTSTAMP:"+new Date().toISOString().replace(/[-:]/g,"").split(".")[0]+"Z\r\n"+
-      "DTSTART:"+stamp(r.d,r.t)+"\r\nDTEND:"+stamp(r.d,endT(r.t,info.h))+"\r\n"+
-      "SUMMARY:"+icsEsc("美甲 · "+r.name+"（"+info.label+"）")+"\r\n"+
-      "LOCATION:"+icsEsc(ADDR)+"\r\n"+
-      "DESCRIPTION:"+icsEsc("微信 "+r.wx+"\n"+info.label+" 约"+info.h+"小时"+(r.note?"\n备注 "+r.note:""))+
-      "\r\nEND:VEVENT\r\n";
-  });
-  out+="END:VCALENDAR\r\n";
-  const url=URL.createObjectURL(new Blob([out],{type:"text/calendar;charset=utf-8"}));
-  const a=document.createElement("a"); a.href=url;
-  a.download=(list.length>1?"qistudio-"+mkey(view):"qistudio-"+list[0].d)+".ics";
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),4000);
-}
-document.getElementById("icsAll").onclick=()=>{
-  const m=mkey(view);
-  const list=Object.values(db.req).filter(r=>r.d.startsWith(m)&&r.status==="confirmed");
-  if(!list.length) return alert("本月还没有已确认的预约");
-  downloadICS(list);
-};
 
 /* ---------- 控制 ---------- */
 document.getElementById("prev").onclick=()=>{view.setMonth(view.getMonth()-1);go();};

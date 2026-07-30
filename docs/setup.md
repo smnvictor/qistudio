@@ -97,7 +97,16 @@ Le binding D1 `DB` vient de `wrangler.toml` et n'est pas à créer dans le dashb
 npx wrangler@latest pages secret put ADMIN_PASSWORD --project-name=qistudio
 ```
 
-Saisir le mot de passe de Qizhi à l'invite. Puis redéployer pour que le secret soit visible des Functions :
+Saisir le mot de passe de Qizhi à l'invite.
+
+Générer le token du calendrier et le garder sous la main, il sert en section 10 :
+
+```
+openssl rand -hex 16
+npx wrangler@latest pages secret put ICS_TOKEN --project-name=qistudio
+```
+
+Coller la valeur générée à l'invite. Puis redéployer pour que les secrets soient visibles des Functions :
 
 ```
 git commit --allow-empty -m "secrets" && git push origin main
@@ -117,7 +126,23 @@ Ouvrir https://qistudio.pages.dev : le calendrier du mois s'affiche, tous les cr
 
 Le point en bas à droite de la page ouvre la connexion admin. Le mot de passe est celui posé en section 8. Une fois connectée, la barre dorée en haut affiche le nombre de demandes en attente, et chaque demande du mois porte ses boutons 批准, 拒绝, 定金已收 et 取消.
 
-## 10. Déploiements suivants
+## 10. Abonnement au calendrier
+
+L'URL du feed, avec le token de la section 8 :
+
+```
+webcal://qistudio.pages.dev/api/calendar/<ICS_TOKEN>.ics
+```
+
+**iPhone** — Réglages → Apps → Calendrier → Comptes → Ajouter un compte → Autre → **Ajouter un abonnement à un calendrier**, coller l'URL, Suivant, Enregistrer.
+
+Puis Réglages → Calendrier → Synchroniser → **Tous les événements**, sans quoi l'historique n'apparaît pas.
+
+**Mac** — Calendrier → Fichier → **Nouvel abonnement au calendrier**, coller l'URL, Emplacement **Sur mon Mac** et non iCloud, Actualisation **toutes les 15 minutes**.
+
+Le rafraîchissement va de quinze minutes à plusieurs heures. Un pull-to-refresh dans l'app Calendrier force la mise à jour.
+
+## 11. Déploiements suivants
 
 ```
 git push origin main

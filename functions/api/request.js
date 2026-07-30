@@ -1,12 +1,4 @@
-let cfg = null;
-
-async function config(request, env) {
-  if (!cfg) {
-    const html = await (await env.ASSETS.fetch(new URL("/", request.url))).text();
-    cfg = JSON.parse(html.match(/<script type="application\/json" id="cfg">([\s\S]*?)<\/script>/)[1]);
-  }
-  return cfg;
-}
+import { config } from "./_config.js";
 
 const bad = (error) => Response.json({ error }, { status: 400 });
 const paris = (opts) => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", ...opts }).format(new Date());

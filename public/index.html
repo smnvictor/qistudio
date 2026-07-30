@@ -174,7 +174,7 @@
     <span><i class="chip gone"></i>已约满</span>
   </div>
 
-  <div class="neterr" id="neterr" hidden>加载失败，请检查网络后重新打开页面</div>
+  <div class="neterr" id="neterr" hidden></div>
 
   <div class="cal">
     <div class="dow"><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div></div>
@@ -256,6 +256,7 @@ const mkey=d=>d.getFullYear()+"-"+pad(d.getMonth()+1);
 const sid=(d,t)=>d+" "+t;
 const endT=(t,h)=>pad((+t.slice(0,2)+h)%24)+":"+t.slice(3);
 const esc=s=>String(s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const note=t=>{const e=document.getElementById("neterr");e.textContent=t;e.hidden=!t;};
 
 function reqAt(d,t){
   for(const id in db.req){const r=db.req[id];
@@ -279,16 +280,19 @@ async function load(m){
     const o=await r.json();
     o.bookings.forEach(b=>{db.req[b.id]=b;});
     o.exceptions.forEach(e=>{if(e.t) db.blocked[sid(e.d,e.t)]=1; else db.off[e.d]=1;});
-    document.getElementById("neterr").hidden=true;
-  }catch(e){document.getElementById("neterr").hidden=false;}
+    note("");
+  }catch(e){note("加载失败，请检查网络后重新打开页面");}
 }
-async function save(m){
-  const req={},blocked={},off={};
-  for(const id in db.req) if(db.req[id].d.startsWith(m)) req[id]=db.req[id];
-  for(const k in db.blocked) if(k.startsWith(m)) blocked[k]=1;
-  for(const k in db.off) if(k.startsWith(m)) off[k]=1;
-  try{await window.storage.set("qistudio:v2:"+m,JSON.stringify({req,blocked,off}),true);}
-  catch(e){alert("保存失败，请重试");}
+async function refresh(){
+  await load(mkey(view));
+  if(admin) await loadInbox();
+  renderMonth(); renderDay(); renderInbox();
+}
+async function toggleException(date,time){
+  const r=await fetch("/api/admin/exception",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({date,time})}).catch(()=>null);
+  await refresh();
+  if(r&&r.status===409) note("这个时段有客人的预约，先在下面处理");
 }
 async function loadMine(){
   try{const r=await fetch("/api/mine"); mine=(await r.json()).bookings;}catch(e){mine=[];}
@@ -353,12 +357,7 @@ function renderDay(){
   box.querySelectorAll(".slot").forEach(el=>{
     el.onclick=()=>{
       const t=el.dataset.t,k=el.dataset.k;
-      if(admin&&editMode){
-        const id=sid(selDay,t);
-        if(reqAt(selDay,t)) return alert("这个时段有客人的预约，先在下面处理");
-        if(db.blocked[id]) delete db.blocked[id]; else db.blocked[id]=1;
-        save(mkey(view)); renderMonth(); renderDay(); return;
-      }
+      if(admin&&editMode) return toggleException(selDay,t);
       if(admin) return;
       if(el.dataset.st!=="free") return;
       picked=(picked&&picked.t===t)?null:{d:selDay,t,k};
@@ -499,10 +498,9 @@ document.getElementById("quitBtn").onclick=async()=>{
 document.getElementById("editBtn").onclick=function(){
   editMode=!editMode; this.textContent=editMode?"✓ 点时段开关":"关闭时段";
 };
-document.getElementById("offBtn").onclick=async()=>{
-  if(!selDay) return alert("先在日历上点一天");
-  if(db.off[selDay]) delete db.off[selDay]; else db.off[selDay]=1;
-  await save(mkey(view)); renderMonth(); renderDay();
+document.getElementById("offBtn").onclick=()=>{
+  if(!selDay) return note("先在日历上点一天");
+  toggleException(selDay,null);
 };
 
 document.getElementById("wxid").textContent=WECHAT;

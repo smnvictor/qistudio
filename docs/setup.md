@@ -106,7 +106,27 @@ openssl rand -hex 16
 npx wrangler@latest pages secret put ICS_TOKEN --project-name=qistudio
 ```
 
-Coller la valeur générée à l'invite. Puis redéployer pour que les secrets soient visibles des Functions :
+Coller la valeur générée à l'invite.
+
+Créer le bot Telegram : dans Telegram, ouvrir **@BotFather**, envoyer `/newbot`, choisir un nom et un identifiant se terminant par `bot`. BotFather renvoie le token.
+
+```
+npx wrangler@latest pages secret put TELEGRAM_BOT_TOKEN --project-name=qistudio
+```
+
+Envoyer ensuite n'importe quel message au bot depuis le compte Telegram de Qizhi, puis relever le `chat_id` :
+
+```
+curl "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/getUpdates"
+```
+
+Le nombre à récupérer est `result[0].message.chat.id`.
+
+```
+npx wrangler@latest pages secret put TELEGRAM_CHAT_ID --project-name=qistudio
+```
+
+Puis redéployer pour que les secrets soient visibles des Functions :
 
 ```
 git commit --allow-empty -m "secrets" && git push origin main

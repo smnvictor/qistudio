@@ -1,5 +1,35 @@
 import { config } from "./_config.js";
 
+const CN = "日一二三四五六";
+const pad = n => String(n).padStart(2, "0");
+
+async function notify(env, c, b) {
+  if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_CHAT_ID) return;
+
+  const info = c.kind[b.k];
+  const day = new Date(b.date + "T00:00:00Z");
+  const end = new Date(new Date(b.date + "T" + b.time + ":00Z").getTime() + info.h * 3600000);
+  const lines = [
+    "💅 新预约申请",
+    "",
+    "姓名 · " + b.name,
+    "微信 · " + b.wechat,
+    "时间 · " + (day.getUTCMonth() + 1) + "月" + day.getUTCDate() + "日 周" + CN[day.getUTCDay()] +
+      " " + b.time + " — " + pad(end.getUTCHours()) + ":" + pad(end.getUTCMinutes()),
+    "款式 · " + info.label + "（约" + info.h + "小时）",
+    "定金 · " + info.deposit + " €"
+  ];
+  if (b.note) lines.push("备注 · " + b.note);
+  lines.push("", "→ 去管理页确认 https://qistudio.pages.dev");
+
+  const r = await fetch("https://api.telegram.org/bot" + env.TELEGRAM_BOT_TOKEN + "/sendMessage", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ chat_id: env.TELEGRAM_CHAT_ID, text: lines.join("\n") })
+  });
+  if (!r.ok) console.log("telegram " + r.status + " " + await r.text());
+}
+
 const bad = (error) => Response.json({ error }, { status: 400 });
 const paris = (opts) => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", ...opts }).format(new Date());
 
@@ -8,7 +38,7 @@ function maxMonth(today, ahead) {
   return (+today.slice(0, 4) + Math.floor(m / 12)) + "-" + String((m % 12) + 1).padStart(2, "0");
 }
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   const c = await config(request, env);
   const body = await request.json().catch(() => null);
   if (!body) return bad("bad body");
@@ -48,6 +78,9 @@ export async function onRequestPost({ request, env }) {
   } catch (e) {
     return Response.json({ error: "taken" }, { status: 409 });
   }
+
+  waitUntil(notify(env, c, { date, time, name, wechat, note, k: slot.k })
+    .catch(e => console.log("telegram " + e)));
 
   const headers = { "Cache-Control": "no-store" };
   if (!cookie) headers["Set-Cookie"] =

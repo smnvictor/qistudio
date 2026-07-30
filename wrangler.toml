@@ -1,0 +1,8 @@
+name = "qistudio"
+compatibility_date = "2026-07-30"
+pages_build_output_dir = "public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "qistudio"
+database_id = "972dd3da-d459-40e8-b114-1128a0480895"

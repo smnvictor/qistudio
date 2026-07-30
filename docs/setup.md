@@ -1,6 +1,6 @@
 # Setup — Qistudio Paris
 
-État couvert : le site est servi sur `qistudio.pages.dev`, la base D1 est créée et son schéma appliqué, le calendrier affiche l'état réel de la base, et une cliente peut soumettre une demande et suivre son statut. L'administration n'est pas encore protégée côté serveur.
+État couvert : le site complet, feed ICS et notifications Telegram inclus.
 
 ## 1. Comptes
 
@@ -97,7 +97,7 @@ Le binding D1 `DB` vient de `wrangler.toml` et n'est pas à créer dans le dashb
 npx wrangler@latest pages secret put ADMIN_PASSWORD --project-name=qistudio
 ```
 
-Saisir le mot de passe de Qizhi à l'invite.
+Saisir le mot de passe de Qizhi à l'invite. Ne pas reprendre `qistudio`, valeur d'exemple présente dans l'historique du dépôt.
 
 Générer le token du calendrier et le garder sous la main, il sert en section 10 :
 
@@ -167,3 +167,26 @@ Le rafraîchissement va de quinze minutes à plusieurs heures. Un pull-to-refres
 ```
 git push origin main
 ```
+
+---
+
+## Pour Qizhi
+
+**Se connecter** — ouvrir qistudio.pages.dev, toucher le petit point gris en bas à droite, saisir le mot de passe. La barre dorée en haut indique que le mode administration est actif. Il reste actif un mois, même après avoir fermé le navigateur.
+
+**Traiter une demande** — les demandes du mois s'affichent sous le calendrier, les nouvelles en premier.
+
+- 批准 : la cliente voit 待付定金 et sait qu'elle doit envoyer le dépôt
+- 拒绝 : le créneau redevient libre
+- 定金已收，确认 : le rendez-vous passe en 已确认 et apparaît dans le calendrier de l'iPhone
+- 取消 : annule un rendez-vous déjà approuvé ou confirmé, le créneau redevient libre
+
+**Fermer une journée** — toucher le jour dans le calendrier, puis 当天休息. Le jour porte le badge 休息 et plus aucun créneau n'est réservable. Toucher 当天休息 à nouveau rouvre la journée.
+
+**Fermer un seul créneau** — toucher 关闭时段, puis toucher le créneau à fermer. Le toucher à nouveau le rouvre. Toucher 关闭时段 une seconde fois quitte ce mode.
+
+Un créneau qui a déjà une demande ne peut pas être fermé : traiter la demande d'abord.
+
+**Rafraîchir le calendrier de l'iPhone** — l'app Calendrier se met à jour toute seule, entre quinze minutes et quelques heures après un changement. Pour forcer : ouvrir l'app Calendrier, aller dans la liste des événements et tirer l'écran vers le bas.
+
+**Quitter le mode administration** — 退出 dans la barre dorée.

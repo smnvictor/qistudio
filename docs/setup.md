@@ -115,7 +115,7 @@ Attendu : `{"bookings":0}`, puis `{"bookings":[],"exceptions":[]}`, puis `bookin
 
 Ouvrir https://qistudio.pages.dev : le calendrier du mois s'affiche, tous les créneaux disponibles. Choisir un créneau, remplir le formulaire, soumettre : le créneau passe en 审核中 et la demande apparaît dans 我的申请.
 
-Le point en bas à droite de la page ouvre la connexion admin. Le mot de passe est celui posé en section 8.
+Le point en bas à droite de la page ouvre la connexion admin. Le mot de passe est celui posé en section 8. Une fois connectée, la barre dorée en haut affiche le nombre de demandes en attente, et chaque demande du mois porte ses boutons 批准, 拒绝, 定金已收 et 取消.
 
 ## 10. Déploiements suivants
 

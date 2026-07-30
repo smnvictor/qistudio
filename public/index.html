@@ -205,6 +205,12 @@
   <button class="btn ghost" id="cancelBtn">再看看</button>
 </div></div>
 
+<div class="sheet" id="csheet" hidden><div class="in">
+  <h3 id="cText"></h3>
+  <button class="btn" id="cYes">确定</button>
+  <button class="btn ghost" id="cNo">再想想</button>
+</div></div>
+
 <div class="sheet" id="asheet" hidden><div class="in">
   <h3>管理登录</h3>
   <label>密码</label><input id="aPwd" type="password" autocomplete="current-password">
@@ -242,7 +248,7 @@ const WECHAT=CFG.wechat, MONTHS_AHEAD=CFG.monthsAhead, ADDR=CFG.addr, RULES=CFG.
 const CN=["日","一","二","三","四","五","六"];
 const today=new Date(); today.setHours(0,0,0,0);
 let view=new Date(today.getFullYear(),today.getMonth(),1);
-let selDay=null,picked=null,admin=false,editMode=false,mine=[];
+let selDay=null,picked=null,admin=false,editMode=false,mine=[],inbox=[];
 let db={req:{},blocked:{},off:{}};
 
 const pad=n=>String(n).padStart(2,"0");
@@ -418,18 +424,26 @@ function renderMine(){
 }
 
 /* ---------- 管理端 ---------- */
+async function loadInbox(){
+  try{const r=await fetch("/api/admin/month?m="+mkey(view));
+    inbox=r.ok?(await r.json()).bookings:[];}catch(e){inbox=[];}
+}
+let askResolve=null;
+const ask=t=>{document.getElementById("cText").textContent=t;
+  document.getElementById("csheet").hidden=false;
+  return new Promise(r=>{askResolve=r;});};
+document.getElementById("cYes").onclick=()=>{document.getElementById("csheet").hidden=true;askResolve(true);};
+document.getElementById("cNo").onclick=()=>{document.getElementById("csheet").hidden=true;askResolve(false);};
+
 function renderInbox(){
   const box=document.getElementById("inbox");
   if(!admin){box.hidden=true;return;}
   box.hidden=false;
-  const m=mkey(view);
-  const list=Object.values(db.req).filter(r=>r.d.startsWith(m)&&r.status!=="declined")
-    .sort((a,b)=>(a.status==="pending"?0:1)-(b.status==="pending"?0:1)||a.d.localeCompare(b.d));
-  const pend=list.filter(r=>r.status==="pending").length;
+  const pend=inbox.filter(r=>r.status==="pending").length;
   document.getElementById("pendCount").textContent=pend?("待处理 "+pend+" 条"):"管理模式";
-  if(!list.length){box.innerHTML='<h4>本月预约</h4><div class="empty">还没有申请</div>';return;}
+  if(!inbox.length){box.innerHTML='<h4>本月预约</h4><div class="empty">还没有申请</div>';return;}
   let h='<h4>本月预约</h4>';
-  list.forEach(r=>{
+  inbox.forEach(r=>{
     const d=new Date(r.d+"T00:00:00"), info=KIND[r.k];
     const bg={pending:'<span class="badge p">待处理</span>',approved:'<span class="badge a">待定金</span>',
               confirmed:'<span class="badge c">已确认</span>'}[r.status];
@@ -437,23 +451,24 @@ function renderInbox(){
        '<span class="when">'+(d.getMonth()+1)+'/'+d.getDate()+' 周'+CN[d.getDay()]+' '+r.t+'</span></div>'+
        '<div class="meta">微信 '+esc(r.wx)+' · '+info.label+' 约'+info.h+'小时'+
        (r.note?'<br>备注：'+esc(r.note):'')+'</div><div class="acts">';
-    if(r.status==="pending") h+='<button class="pri" data-a="approve" data-i="'+r.id+'">批准</button>'+
-       '<button class="warn" data-a="decline" data-i="'+r.id+'">拒绝</button>';
-    if(r.status==="approved") h+='<button class="pri" data-a="confirm" data-i="'+r.id+'">定金已收，确认</button>'+
-       '<button class="warn" data-a="decline" data-i="'+r.id+'">取消</button>';
+    if(r.status==="pending") h+='<button class="pri" data-a="approved" data-i="'+r.id+'">批准</button>'+
+       '<button class="warn" data-a="declined" data-i="'+r.id+'">拒绝</button>';
+    if(r.status==="approved") h+='<button class="pri" data-a="confirmed" data-i="'+r.id+'">定金已收，确认</button>'+
+       '<button class="warn" data-a="cancelled" data-i="'+r.id+'">取消</button>';
     if(r.status==="confirmed") h+='<button data-a="ics" data-i="'+r.id+'">加入日历</button>'+
-       '<button class="warn" data-a="decline" data-i="'+r.id+'">取消</button>';
+       '<button class="warn" data-a="cancelled" data-i="'+r.id+'">取消</button>';
     h+='</div></div>';
   });
   box.innerHTML=h;
   box.querySelectorAll("[data-a]").forEach(b=>{
     b.onclick=async()=>{
-      const r=db.req[b.dataset.i], a=b.dataset.a;
-      if(a==="approve") r.status="approved";
-      if(a==="confirm"){r.status="confirmed"; downloadICS([r]);}
-      if(a==="decline"){ if(!confirm("确定要取消 "+r.name+" 的预约吗？")) return; r.status="declined"; }
+      const a=b.dataset.a, r=inbox.find(x=>x.id===b.dataset.i);
       if(a==="ics") return downloadICS([r]);
-      await save(mkey(view)); renderMonth(); renderDay(); renderInbox();
+      if((a==="declined"||a==="cancelled")&&!await ask("确定要取消 "+r.name+" 的预约吗？")) return;
+      const res=await fetch("/api/admin/booking/"+r.id+"/status",{method:"POST",
+        headers:{"Content-Type":"application/json"},body:JSON.stringify({status:a})}).catch(()=>null);
+      if(a==="confirmed"&&res&&res.ok) downloadICS([r]);
+      await go();
     };
   });
 }
@@ -491,6 +506,7 @@ document.getElementById("icsAll").onclick=()=>{
 document.getElementById("prev").onclick=()=>{view.setMonth(view.getMonth()-1);go();};
 document.getElementById("next").onclick=()=>{view.setMonth(view.getMonth()+1);go();};
 async function go(){selDay=null;picked=null;await load(mkey(view));
+  if(admin) await loadInbox();
   renderMonth();renderDay();renderBar();renderInbox();renderMine();}
 
 document.getElementById("adminBtn").onclick=()=>{

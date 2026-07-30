@@ -75,6 +75,8 @@
   .slot.picked{border-color:var(--ink)} .slot.picked .state{color:var(--gold)}
   .empty{border:1px dashed var(--line);border-radius:4px;padding:28px;text-align:center;
     color:var(--muted);font-size:13px;line-height:1.9}
+  .neterr{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--rose);
+    border-radius:3px;padding:13px 15px;margin-bottom:14px;font-size:13px;color:var(--muted)}
 
   .sheet{position:fixed;inset:0;background:rgba(31,26,34,.45);z-index:40;display:flex;
     align-items:flex-end;justify-content:center}
@@ -171,6 +173,8 @@
     <span><i class="chip gone"></i>已约满</span>
   </div>
 
+  <div class="neterr" id="neterr" hidden>加载失败，请检查网络后重新打开页面</div>
+
   <div class="cal">
     <div class="dow"><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div></div>
     <div class="grid" id="grid"></div>
@@ -247,10 +251,14 @@ function slotState(d,s){
 
 /* ---------- 存取 ---------- */
 async function load(m){
-  try{const r=await window.storage.get("qistudio:v2:"+m,true);
-    if(r&&r.value){const o=JSON.parse(r.value);
-      Object.assign(db.req,o.req||{});Object.assign(db.blocked,o.blocked||{});Object.assign(db.off,o.off||{});}
-  }catch(e){}
+  db={req:{},blocked:{},off:{}};
+  try{const r=await fetch("/api/month?m="+m);
+    if(!r.ok) throw 0;
+    const o=await r.json();
+    o.bookings.forEach(b=>{db.req[b.id]=b;});
+    o.exceptions.forEach(e=>{if(e.t) db.blocked[sid(e.d,e.t)]=1; else db.off[e.d]=1;});
+    document.getElementById("neterr").hidden=true;
+  }catch(e){document.getElementById("neterr").hidden=false;}
 }
 async function save(m){
   const req={},blocked={},off={};
@@ -313,7 +321,7 @@ function renderDay(){
   slots.forEach(s=>{
     const st=slotState(selDay,s), info=KIND[s.k], r=reqAt(selDay,s.t);
     let label={free:"可约",pending:"审核中",taken:"已约",off:"不开放",past:"已过"}[st];
-    if(admin&&r) label=(r.status==="pending"?"待处理 · ":r.status==="approved"?"待定金 · ":"已确认 · ")+r.name;
+    if(admin&&r) label=(r.status==="pending"?"待处理":r.status==="approved"?"待定金":"已确认")+(r.name?" · "+r.name:"");
     if(picked&&picked.t===s.t&&!admin) label="已选 ✓";
     const cls=["slot","k-"+s.k,"st-"+st,(st==="free"||st==="pending")?"":"off",
                (picked&&picked.t===s.t)?"picked":""].join(" ");

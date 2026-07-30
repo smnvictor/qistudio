@@ -1,6 +1,6 @@
 # Setup — Qistudio Paris
 
-État couvert : le site public est servi sur `qistudio.pages.dev`, la base D1 est créée et son schéma appliqué, `/api/health` répond depuis la production.
+État couvert : le site est servi sur `qistudio.pages.dev`, la base D1 est créée et son schéma appliqué, et le calendrier affiche l'état réel de la base via `/api/month`. Lecture seule : aucune réservation ne peut encore être soumise depuis le site.
 
 ## 1. Comptes
 
@@ -95,10 +95,13 @@ Le binding D1 `DB` vient de `wrangler.toml` et n'est pas à créer dans le dashb
 
 ```
 curl https://qistudio.pages.dev/api/health
+curl "https://qistudio.pages.dev/api/month?m=$(date +%Y-%m)"
 npx wrangler@latest d1 execute qistudio-rdv-db --remote --command "SELECT name FROM sqlite_master"
 ```
 
-Attendu : `{"bookings":0}`, puis `booking`, `idx_slot_taken`, `slot_exception`.
+Attendu : `{"bookings":0}`, puis `{"bookings":[],"exceptions":[]}`, puis `booking`, `idx_slot_taken`, `slot_exception`.
+
+Ouvrir https://qistudio.pages.dev : le calendrier du mois s'affiche, tous les créneaux disponibles.
 
 ## 9. Déploiements suivants
 

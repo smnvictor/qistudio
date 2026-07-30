@@ -1,6 +1,6 @@
 # Setup — Qistudio Paris
 
-État couvert : le site est servi sur `qistudio.pages.dev`, la base D1 est créée et son schéma appliqué, et le calendrier affiche l'état réel de la base via `/api/month`. Lecture seule : aucune réservation ne peut encore être soumise depuis le site.
+État couvert : le site est servi sur `qistudio.pages.dev`, la base D1 est créée et son schéma appliqué, le calendrier affiche l'état réel de la base, et une cliente peut soumettre une demande et suivre son statut. L'administration n'est pas encore protégée côté serveur.
 
 ## 1. Comptes
 
@@ -101,7 +101,7 @@ npx wrangler@latest d1 execute qistudio-rdv-db --remote --command "SELECT name F
 
 Attendu : `{"bookings":0}`, puis `{"bookings":[],"exceptions":[]}`, puis `booking`, `idx_slot_taken`, `slot_exception`.
 
-Ouvrir https://qistudio.pages.dev : le calendrier du mois s'affiche, tous les créneaux disponibles.
+Ouvrir https://qistudio.pages.dev : le calendrier du mois s'affiche, tous les créneaux disponibles. Choisir un créneau, remplir le formulaire, soumettre : le créneau passe en 审核中 et la demande apparaît dans 我的申请.
 
 ## 9. Déploiements suivants
 

@@ -75,8 +75,10 @@
   .slot.picked{border-color:var(--ink)} .slot.picked .state{color:var(--gold)}
   .empty{border:1px dashed var(--line);border-radius:4px;padding:28px;text-align:center;
     color:var(--muted);font-size:13px;line-height:1.9}
-  .neterr{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--rose);
-    border-radius:3px;padding:13px 15px;margin-bottom:14px;font-size:13px;color:var(--muted)}
+  .neterr,.msg{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--rose);
+    border-radius:3px;padding:13px 15px;font-size:13px;color:var(--muted);line-height:1.7}
+  .neterr{margin-bottom:14px}
+  .msg{margin-top:16px;background:var(--paper)}
 
   .sheet{position:fixed;inset:0;background:rgba(31,26,34,.45);z-index:40;display:flex;
     align-items:flex-end;justify-content:center}
@@ -198,29 +200,37 @@
   <label>你的称呼</label><input id="fName" placeholder="怎么称呼你">
   <label>微信号</label><input id="fWx" placeholder="方便我联系你确认定金">
   <label>想做的款式 / 备注（可不填）</label><textarea id="fNote" placeholder="比如：法式、猫眼、想参考的图"></textarea>
+  <div class="msg" id="shMsg" hidden></div>
   <button class="btn" id="submitBtn">提交申请</button>
   <button class="btn ghost" id="cancelBtn">再看看</button>
 </div></div>
 
 <button id="adminBtn" aria-label="管理">·</button>
 
+<!-- ========== 设置区（只有这里需要改） ========== -->
+<script type="application/json" id="cfg">
+{
+  "wechat": "QISTUDIO_PARIS",
+  "monthsAhead": 2,
+  "addr": "Vanves 92170",
+  "rules": {
+    "1": [{"t":"17:00","k":"simple"},{"t":"19:00","k":"full"}],
+    "2": [{"t":"17:00","k":"simple"},{"t":"19:00","k":"full"}],
+    "3": [{"t":"17:00","k":"simple"},{"t":"19:00","k":"full"}],
+    "4": [{"t":"17:00","k":"simple"},{"t":"19:00","k":"full"}],
+    "5": [{"t":"17:00","k":"simple"},{"t":"19:00","k":"full"}],
+    "6": [{"t":"11:00","k":"full"},{"t":"14:00","k":"full"},{"t":"17:00","k":"full"},{"t":"20:00","k":"full"}],
+    "0": [{"t":"11:00","k":"simple"},{"t":"16:00","k":"full"},{"t":"19:00","k":"full"}]
+  },
+  "kind": {"simple":{"label":"简单款式","h":2},"full":{"label":"不限款式","h":3}}
+}
+</script>
+<!-- ============================================ -->
+
 <script>
-/* ========== 设置区（只有这里需要改） ========== */
-const WECHAT="QISTUDIO_PARIS";
+const CFG=JSON.parse(document.getElementById("cfg").textContent);
+const WECHAT=CFG.wechat, MONTHS_AHEAD=CFG.monthsAhead, ADDR=CFG.addr, RULES=CFG.rules, KIND=CFG.kind;
 const ADMIN_CODE="qistudio";
-const MONTHS_AHEAD=2;
-const ADDR="Vanves 92170";
-const RULES={
-  1:[{t:"17:00",k:"simple"},{t:"19:00",k:"full"}],
-  2:[{t:"17:00",k:"simple"},{t:"19:00",k:"full"}],
-  3:[{t:"17:00",k:"simple"},{t:"19:00",k:"full"}],
-  4:[{t:"17:00",k:"simple"},{t:"19:00",k:"full"}],
-  5:[{t:"17:00",k:"simple"},{t:"19:00",k:"full"}],
-  6:[{t:"11:00",k:"full"},{t:"14:00",k:"full"},{t:"17:00",k:"full"},{t:"20:00",k:"full"}],
-  0:[{t:"11:00",k:"simple"},{t:"16:00",k:"full"},{t:"19:00",k:"full"}]
-};
-const KIND={simple:{label:"简单款式",h:2},full:{label:"不限款式",h:3}};
-/* ============================================ */
 
 const CN=["日","一","二","三","四","五","六"];
 const today=new Date(); today.setHours(0,0,0,0);
@@ -269,11 +279,7 @@ async function save(m){
   catch(e){alert("保存失败，请重试");}
 }
 async function loadMine(){
-  try{const r=await window.storage.get("qistudio:mine",false);
-    if(r&&r.value) mine=JSON.parse(r.value);}catch(e){mine=[];}
-}
-async function saveMine(){
-  try{await window.storage.set("qistudio:mine",JSON.stringify(mine),false);}catch(e){}
+  try{const r=await fetch("/api/mine"); mine=(await r.json()).bookings;}catch(e){mine=[];}
 }
 
 /* ---------- 日历 ---------- */
@@ -368,36 +374,36 @@ document.getElementById("goBtn").onclick=()=>{
     endT(picked.t,info.h)+" · "+info.label;
   document.getElementById("sheet").hidden=false;
 };
-document.getElementById("cancelBtn").onclick=()=>document.getElementById("sheet").hidden=true;
+document.getElementById("cancelBtn").onclick=()=>{document.getElementById("sheet").hidden=true;msg("");};
+const msg=t=>{const e=document.getElementById("shMsg");e.textContent=t;e.hidden=!t;};
 document.getElementById("submitBtn").onclick=async()=>{
   const name=document.getElementById("fName").value.trim();
   const wx=document.getElementById("fWx").value.trim();
-  if(!name) return alert("留个称呼吧");
-  if(!wx) return alert("留下微信号我才能找到你");
-  await load(mkey(view));
-  if(slotState(picked.d,{t:picked.t})!=="free"&&reqAt(picked.d,picked.t))
-    { alert("抱歉，这个时段刚被人约走了"); document.getElementById("sheet").hidden=true;
-      renderMonth(); renderDay(); return; }
-  const id="r"+Date.now()+Math.floor(Math.random()*900+100);
-  db.req[id]={id,d:picked.d,t:picked.t,k:picked.k,name,wx,
-    note:document.getElementById("fNote").value.trim(),status:"pending",at:Date.now()};
-  await save(mkey(view));
-  mine.push(id); await saveMine();
-  document.getElementById("sheet").hidden=true;
-  picked=null; renderMonth(); renderDay(); renderBar(); renderMine();
-  alert("申请已提交。\n请微信联系 "+WECHAT+" 发定金，我确认后这个时间就正式为你留着。");
+  if(!name) return msg("留个称呼吧");
+  if(!wx) return msg("留下微信号我才能找到你");
+  msg("");
+  const r=await fetch("/api/request",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({date:picked.d,time:picked.t,name,wechat:wx,
+      note:document.getElementById("fNote").value.trim()})}).catch(()=>null);
+  if(r&&r.status===409){msg("抱歉，这个时段刚被人约走了");await go();return;}
+  if(!r||!r.ok) return msg("提交失败，请重试");
+  document.getElementById("fName").value="";
+  document.getElementById("fWx").value="";
+  document.getElementById("fNote").value="";
+  msg("申请已提交。请微信联系 "+WECHAT+" 发定金，我确认后这个时间就正式为你留着。");
+  await loadMine(); await go();
 };
 
 function renderMine(){
   const box=document.getElementById("mine");
-  const list=mine.map(id=>db.req[id]).filter(Boolean);
-  if(admin||!list.length){box.hidden=true;return;}
+  if(admin||!mine.length){box.hidden=true;return;}
   box.hidden=false;
   let h='<h4>我的申请</h4>';
-  list.sort((a,b)=>a.d.localeCompare(b.d)).forEach(r=>{
+  mine.forEach(r=>{
     const d=new Date(r.d+"T00:00:00");
-    const cls=r.status==="confirmed"?"ok":r.status==="declined"?"no":"";
-    const s={pending:"等待确认",approved:"待付定金",confirmed:"已确认 ✓",declined:"未通过"}[r.status];
+    const cls=r.status==="confirmed"?"ok":(r.status==="declined"||r.status==="cancelled")?"no":"";
+    const s={pending:"等待确认",approved:"待付定金",confirmed:"已确认 ✓",
+             declined:"未通过",cancelled:"已取消"}[r.status];
     h+='<div class="rq '+cls+'"><span class="m">'+(d.getMonth()+1)+'/'+d.getDate()+' '+r.t+
        ' · '+KIND[r.k].label+'</span><span class="s">'+s+'</span></div>';
   });

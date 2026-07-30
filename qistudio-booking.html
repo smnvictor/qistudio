@@ -1,0 +1,493 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qistudio Paris · 预约</title>
+<style>
+  :root{
+    --paper:#F3F0F4; --card:#FFF; --ink:#1F1A22; --muted:#8B8391; --line:#E4DFE9;
+    --rose:#A82C4A; --teal:#3F7A6C; --gold:#A2823F; --amber:#C4802B;
+    --serif: Didot,"Bodoni 72","Bodoni MT","Songti SC","Times New Roman",serif;
+    --sans: -apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;
+    --mono: "SF Mono",ui-monospace,Menlo,"Roboto Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+       -webkit-font-smoothing:antialiased;padding:0 0 130px}
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px}
+  h1{font-family:var(--serif);font-weight:400;font-size:clamp(34px,9vw,56px);margin:0;line-height:1}
+  header{padding:40px 0 18px;text-align:center}
+  .brand{font-size:11px;letter-spacing:.42em;text-transform:uppercase;color:var(--muted);margin-bottom:24px}
+  .brand b{color:var(--ink);font-weight:600}
+  .monthline{display:flex;align-items:center;justify-content:center;gap:20px}
+  .monthline button{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);
+    background:transparent;color:var(--ink);cursor:pointer;font-size:15px}
+  .monthline button:hover:not(:disabled){background:#fff;border-color:var(--ink)}
+  .monthline button:disabled{opacity:.25;cursor:default}
+  .yr{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--muted);margin-top:12px}
+  .note{margin:20px auto 0;max-width:440px;font-size:13px;line-height:1.8;color:var(--muted)}
+  .note b{color:var(--ink);font-weight:500}
+  .legend{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin:24px 0 16px;
+    font-size:12px;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .chip{width:14px;height:9px;border-radius:5px;display:inline-block}
+  .chip.teal{background:var(--teal)} .chip.rose{background:var(--rose)}
+  .chip.gone{background:#D8D3DE} .chip.amber{background:var(--amber)}
+
+  .cal{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:14px 10px 8px}
+  .dow{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:6px}
+  .dow div{text-align:center;font-size:10px;letter-spacing:.16em;color:var(--muted);
+    padding-bottom:8px;border-bottom:1px solid var(--line)}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr)}
+  .cell{position:relative;aspect-ratio:1/1.08;border:0;background:transparent;display:flex;
+    flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;
+    font-family:var(--mono);font-size:13px;color:var(--ink);border-radius:3px;padding:0}
+  .cell:hover:not(.dim){background:var(--paper)}
+  .cell.dim{color:#CFC9D6;cursor:default}
+  .cell.sel{background:var(--ink);color:#fff}
+  .dots{display:flex;gap:3px;height:6px;align-items:center}
+  .dots i{width:5px;height:5px;border-radius:50%;display:block}
+  .dots i.teal{background:var(--teal)} .dots i.rose{background:var(--rose)}
+  .dots i.amber{background:var(--amber)} .dots i.gone{background:#DDD8E3}
+  .cell.sel .dots i.gone{background:#5B5364}
+  .tag{font-size:9px;font-family:var(--sans);letter-spacing:.08em;color:#BDB6C6}
+
+  .day{margin-top:28px}
+  .dayhead{display:flex;align-items:baseline;justify-content:space-between;padding-bottom:12px;
+    border-bottom:1px solid var(--line);margin-bottom:16px}
+  .dayhead h2{font-family:var(--serif);font-weight:400;font-size:25px;margin:0}
+  .dayhead em{font-style:normal;font-size:11px;letter-spacing:.2em;color:var(--muted);font-family:var(--mono)}
+  .slot{width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:4px;
+    padding:0;margin-bottom:10px;display:flex;cursor:pointer;overflow:hidden;font-family:inherit;color:inherit}
+  .slot:hover{border-color:#C9C2D2}
+  .swatch{flex:0 0 56px;position:relative;background:var(--teal)}
+  .slot.k-full .swatch{background:var(--rose)}
+  .slot.st-pending .swatch{background:var(--amber)}
+  .swatch::after{content:"";position:absolute;left:14px;top:12px;width:8px;bottom:12px;border-radius:6px;
+    background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.06))}
+  .slot.off .swatch{background:#DCD7E2}
+  .slot.off .swatch::after{opacity:.35}
+  .bd{flex:1;padding:15px 17px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .t{font-family:var(--mono);font-size:19px} .t span{font-size:11px;color:var(--muted);margin-left:8px}
+  .k{font-size:12px;color:var(--muted);margin-top:5px;display:block} .k b{color:var(--ink);font-weight:500}
+  .state{font-size:11px;letter-spacing:.12em;color:var(--teal);white-space:nowrap;text-align:right}
+  .slot.k-full .state{color:var(--rose)}
+  .slot.st-pending .state{color:var(--amber)}
+  .slot.off{background:#FAF9FB} .slot.off .t,.slot.off .k b,.slot.off .state{color:#B4AEBE}
+  .slot.picked{border-color:var(--ink)} .slot.picked .state{color:var(--gold)}
+  .empty{border:1px dashed var(--line);border-radius:4px;padding:28px;text-align:center;
+    color:var(--muted);font-size:13px;line-height:1.9}
+
+  .sheet{position:fixed;inset:0;background:rgba(31,26,34,.45);z-index:40;display:flex;
+    align-items:flex-end;justify-content:center}
+  .sheet .in{background:var(--card);width:100%;max-width:520px;border-radius:6px 6px 0 0;
+    padding:26px 22px calc(26px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto}
+  .sheet h3{font-family:var(--serif);font-weight:400;font-size:23px;margin:0 0 6px}
+  .sheet .sub{font-size:12px;color:var(--muted);margin-bottom:20px;font-family:var(--mono)}
+  label{display:block;font-size:11px;letter-spacing:.14em;color:var(--muted);margin:14px 0 6px}
+  input,textarea{width:100%;border:1px solid var(--line);border-radius:3px;padding:11px 12px;
+    font-family:inherit;font-size:15px;background:#FCFBFD;color:var(--ink)}
+  input:focus,textarea:focus{outline:0;border-color:var(--ink)}
+  textarea{resize:vertical;min-height:64px}
+  .btn{width:100%;border:0;border-radius:3px;padding:14px;font-family:var(--sans);font-size:14px;
+    font-weight:500;cursor:pointer;margin-top:20px;background:var(--ink);color:#fff}
+  .btn:hover{background:#37303C}
+  .btn.ghost{background:transparent;color:var(--muted);margin-top:8px;padding:10px}
+  .bar{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:#fff;
+    transform:translateY(110%);transition:transform .28s cubic-bezier(.2,.7,.3,1);z-index:20}
+  .bar.on{transform:none}
+  .bar .in{max-width:760px;margin:0 auto;padding:15px 20px calc(15px + env(safe-area-inset-bottom));
+    display:flex;align-items:center;gap:16px}
+  .bar .txt{flex:1;min-width:0}
+  .bar .txt div:first-child{font-family:var(--mono);font-size:14px}
+  .bar .txt div:last-child{font-size:11px;color:#A79FB2;margin-top:4px}
+  .bar button{background:#fff;color:var(--ink);border:0;border-radius:2px;padding:12px 18px;
+    font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+  .mine{margin-top:30px}
+  .mine h4{font-size:11px;letter-spacing:.2em;color:var(--muted);font-weight:400;margin:0 0 12px}
+  .rq{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--amber);
+    border-radius:3px;padding:13px 15px;margin-bottom:8px;font-size:13px;display:flex;
+    justify-content:space-between;align-items:center;gap:12px}
+  .rq.ok{border-left-color:var(--teal)} .rq.no{border-left-color:#C9C2D2;opacity:.6}
+  .rq .s{font-size:11px;letter-spacing:.1em;color:var(--amber);white-space:nowrap}
+  .rq.ok .s{color:var(--teal)} .rq.no .s{color:var(--muted)}
+  .rq .m{font-family:var(--mono)}
+  footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);font-size:12px;
+    color:var(--muted);line-height:2;text-align:center}
+  footer b{color:var(--ink);font-weight:500;font-family:var(--mono)}
+
+  /* admin */
+  #adminBtn{position:fixed;right:14px;bottom:14px;width:26px;height:26px;border-radius:50%;
+    border:1px solid var(--line);background:var(--paper);color:#C6C0D0;cursor:pointer;font-size:11px;z-index:30}
+  .abar{position:sticky;top:0;z-index:25;background:var(--gold);color:#fff;font-size:12px;
+    padding:10px 16px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+  .abar button{background:rgba(255,255,255,.2);border:0;color:#fff;padding:6px 12px;border-radius:2px;
+    cursor:pointer;font-size:12px}
+  .abar button:hover{background:rgba(255,255,255,.33)}
+  .inbox{margin:26px 0 0}
+  .inbox h4{font-size:11px;letter-spacing:.2em;color:var(--muted);font-weight:400;margin:0 0 12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:16px;margin-bottom:10px}
+  .card .top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:6px}
+  .card .who{font-size:15px;font-weight:500}
+  .card .when{font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .card .meta{font-size:12px;color:var(--muted);line-height:1.8}
+  .card .acts{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .card .acts button{flex:1;min-width:96px;border:1px solid var(--line);background:#fff;border-radius:2px;
+    padding:10px;font-size:12px;cursor:pointer;font-family:inherit;color:var(--ink)}
+  .card .acts button.pri{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .card .acts button.warn{color:var(--rose)}
+  .badge{display:inline-block;font-size:10px;letter-spacing:.1em;padding:3px 7px;border-radius:2px;
+    background:#F1EDF5;color:var(--muted);margin-left:8px;vertical-align:middle}
+  .badge.p{background:#FBF0E2;color:var(--amber)}
+  .badge.a{background:#E9F1EF;color:var(--teal)}
+  .badge.c{background:var(--ink);color:#fff}
+  [hidden]{display:none!important}
+  @media (max-width:520px){.wrap{padding:0 14px}.bd{padding:13px}.swatch{flex-basis:44px}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+</style>
+
+<div class="abar" id="abar" hidden>
+  <span id="pendCount">管理模式</span>
+  <button id="offBtn">当天休息</button>
+  <button id="editBtn">关闭时段</button>
+  <button id="icsAll">导出本月日历</button>
+  <button id="quitBtn">退出</button>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="brand"><b>Qistudio</b> Paris · Nail Atelier</div>
+    <div class="monthline">
+      <button id="prev" aria-label="上个月">‹</button><h1 id="mtitle">—</h1>
+      <button id="next" aria-label="下个月">›</button>
+    </div>
+    <div class="yr" id="ytitle"></div>
+    <p class="note">选好时间提交申请，我确认后会通知你。<b>收到定金才算正式约上。</b></p>
+  </header>
+
+  <div class="legend">
+    <span><i class="chip teal"></i>简单款式 2小时</span>
+    <span><i class="chip rose"></i>不限款式 3小时</span>
+    <span><i class="chip amber"></i>审核中</span>
+    <span><i class="chip gone"></i>已约满</span>
+  </div>
+
+  <div class="cal">
+    <div class="dow"><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div></div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <section class="day" id="day"></section>
+  <section class="inbox" id="inbox" hidden></section>
+  <section class="mine" id="mine" hidden></section>
+
+  <footer>预约微信 <b id="wxid"></b><br>Vanves 92170 · 确认后发送具体地址</footer>
+</div>
+
+<div class="bar" id="bar"><div class="in">
+  <div class="txt"><div id="barT"></div><div id="barK"></div></div>
+  <button id="goBtn">填写申请</button>
+</div></div>
+
+<div class="sheet" id="sheet" hidden><div class="in">
+  <h3 id="shT">提交预约申请</h3>
+  <div class="sub" id="shSub"></div>
+  <label>你的称呼</label><input id="fName" placeholder="怎么称呼你">
+  <label>微信号</label><input id="fWx" placeholder="方便我联系你确认定金">
+  <label>想做的款式 / 备注（可不填）</label><textarea id="fNote" placeholder="比如：法式、猫眼、想参考的图"></textarea>
+  <button class="btn" id="submitBtn">提交申请</button>
+  <button class="btn ghost" id="cancelBtn">再看看</button>
+</div></div>
+
+<button id="adminBtn" aria-label="管理">·</button>
+
+<script>
+/* ========== 设置区（只有这里需要改） ========== */
+const WECHAT="QISTUDIO_PARIS";
+const ADMIN_CODE="qistudio";
+const MONTHS_AHEAD=2;
+const ADDR="Vanves 92170";
+const RULES={
+  1:[{t:"17:00",k:"simple"},{t:"19:00",k:"full"}],
+  2:[{t:"17:00",k:"simple"},{t:"19:00",k:"full"}],
+  3:[{t:"17:00",k:"simple"},{t:"19:00",k:"full"}],
+  4:[{t:"17:00",k:"simple"},{t:"19:00",k:"full"}],
+  5:[{t:"17:00",k:"simple"},{t:"19:00",k:"full"}],
+  6:[{t:"11:00",k:"full"},{t:"14:00",k:"full"},{t:"17:00",k:"full"},{t:"20:00",k:"full"}],
+  0:[{t:"11:00",k:"simple"},{t:"16:00",k:"full"},{t:"19:00",k:"full"}]
+};
+const KIND={simple:{label:"简单款式",h:2},full:{label:"不限款式",h:3}};
+/* ============================================ */
+
+const CN=["日","一","二","三","四","五","六"];
+const today=new Date(); today.setHours(0,0,0,0);
+let view=new Date(today.getFullYear(),today.getMonth(),1);
+let selDay=null,picked=null,admin=false,editMode=false,mine=[];
+let db={req:{},blocked:{},off:{}};
+
+const pad=n=>String(n).padStart(2,"0");
+const key=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const mkey=d=>d.getFullYear()+"-"+pad(d.getMonth()+1);
+const sid=(d,t)=>d+" "+t;
+const endT=(t,h)=>pad((+t.slice(0,2)+h)%24)+":"+t.slice(3);
+const esc=s=>String(s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+
+function reqAt(d,t){
+  for(const id in db.req){const r=db.req[id];
+    if(r.d===d&&r.t===t&&r.status!=="declined") return r;}
+  return null;
+}
+function slotState(d,s){
+  if(db.off[d]) return "off";
+  if(db.blocked[sid(d,s.t)]) return "off";
+  if(new Date(d+"T"+s.t+":00").getTime()<Date.now()) return "past";
+  const r=reqAt(d,s.t);
+  if(r) return r.status==="pending"?"pending":"taken";
+  return "free";
+}
+
+/* ---------- 存取 ---------- */
+async function load(m){
+  try{const r=await window.storage.get("qistudio:v2:"+m,true);
+    if(r&&r.value){const o=JSON.parse(r.value);
+      Object.assign(db.req,o.req||{});Object.assign(db.blocked,o.blocked||{});Object.assign(db.off,o.off||{});}
+  }catch(e){}
+}
+async function save(m){
+  const req={},blocked={},off={};
+  for(const id in db.req) if(db.req[id].d.startsWith(m)) req[id]=db.req[id];
+  for(const k in db.blocked) if(k.startsWith(m)) blocked[k]=1;
+  for(const k in db.off) if(k.startsWith(m)) off[k]=1;
+  try{await window.storage.set("qistudio:v2:"+m,JSON.stringify({req,blocked,off}),true);}
+  catch(e){alert("保存失败，请重试");}
+}
+async function loadMine(){
+  try{const r=await window.storage.get("qistudio:mine",false);
+    if(r&&r.value) mine=JSON.parse(r.value);}catch(e){mine=[];}
+}
+async function saveMine(){
+  try{await window.storage.set("qistudio:mine",JSON.stringify(mine),false);}catch(e){}
+}
+
+/* ---------- 日历 ---------- */
+function renderMonth(){
+  document.getElementById("mtitle").textContent=(view.getMonth()+1)+"月";
+  document.getElementById("ytitle").textContent=view.getFullYear();
+  const first=new Date(view.getFullYear(),view.getMonth(),1);
+  const lead=(first.getDay()+6)%7;
+  const days=new Date(view.getFullYear(),view.getMonth()+1,0).getDate();
+  const g=document.getElementById("grid"); g.innerHTML="";
+  for(let i=0;i<lead;i++) g.appendChild(document.createElement("div"));
+  for(let d=1;d<=days;d++){
+    const date=new Date(view.getFullYear(),view.getMonth(),d), dk=key(date);
+    const slots=RULES[date.getDay()]||[], sts=slots.map(s=>slotState(dk,s));
+    const free=sts.filter(x=>x==="free").length;
+    const gone=date<today||free===0;
+    const b=document.createElement("button");
+    b.className="cell"+(gone&&!admin?" dim":"")+(selDay===dk?" sel":"");
+    b.innerHTML="<span>"+d+"</span>";
+    const dots=document.createElement("span"); dots.className="dots";
+    slots.forEach((s,i)=>{const o=document.createElement("i");
+      o.className=sts[i]==="free"?(s.k==="full"?"rose":"teal"):(sts[i]==="pending"?"amber":"gone");
+      dots.appendChild(o);});
+    b.appendChild(dots);
+    if(db.off[dk]&&date>=today){const f=document.createElement("span");f.className="tag";f.textContent="休息";b.appendChild(f);}
+    else if(slots.length&&free===0&&date>=today){const f=document.createElement("span");f.className="tag";f.textContent="已满";b.appendChild(f);}
+    if(!gone||admin) b.onclick=()=>{selDay=dk;picked=null;renderMonth();renderDay();renderBar();};
+    else b.disabled=true;
+    g.appendChild(b);
+  }
+  const cur=view.getFullYear()*12+view.getMonth(), now=today.getFullYear()*12+today.getMonth();
+  document.getElementById("prev").disabled=cur<=now;
+  document.getElementById("next").disabled=cur>=now+MONTHS_AHEAD;
+}
+
+function renderDay(){
+  const box=document.getElementById("day");
+  if(!selDay){box.innerHTML="";return;}
+  const date=new Date(selDay+"T00:00:00"), slots=RULES[date.getDay()]||[];
+  let h='<div class="dayhead"><h2>'+(date.getMonth()+1)+'月'+date.getDate()+
+        '日 <span style="font-size:15px;color:var(--muted)">周'+CN[date.getDay()]+'</span>'+
+        (db.off[selDay]?'<span class="badge">休息</span>':'')+
+        '</h2><em>'+selDay+'</em></div>';
+  if(!slots.length){box.innerHTML=h+'<div class="empty">这天没有开放的时段</div>';return;}
+  slots.forEach(s=>{
+    const st=slotState(selDay,s), info=KIND[s.k], r=reqAt(selDay,s.t);
+    let label={free:"可约",pending:"审核中",taken:"已约",off:"不开放",past:"已过"}[st];
+    if(admin&&r) label=(r.status==="pending"?"待处理 · ":r.status==="approved"?"待定金 · ":"已确认 · ")+r.name;
+    if(picked&&picked.t===s.t&&!admin) label="已选 ✓";
+    const cls=["slot","k-"+s.k,"st-"+st,(st==="free"||st==="pending")?"":"off",
+               (picked&&picked.t===s.t)?"picked":""].join(" ");
+    h+='<button class="'+cls+'" data-t="'+s.t+'" data-k="'+s.k+'" data-st="'+st+'">'+
+       '<span class="swatch"></span><span class="bd"><span>'+
+       '<span class="t">'+s.t+'<span>— '+endT(s.t,info.h)+'</span></span>'+
+       '<span class="k"><b>'+info.label+'</b> · 约'+info.h+'小时</span></span>'+
+       '<span class="state">'+esc(label)+'</span></span></button>';
+  });
+  box.innerHTML=h;
+  box.querySelectorAll(".slot").forEach(el=>{
+    el.onclick=()=>{
+      const t=el.dataset.t,k=el.dataset.k;
+      if(admin&&editMode){
+        const id=sid(selDay,t);
+        if(reqAt(selDay,t)) return alert("这个时段有客人的预约，先在下面处理");
+        if(db.blocked[id]) delete db.blocked[id]; else db.blocked[id]=1;
+        save(mkey(view)); renderMonth(); renderDay(); return;
+      }
+      if(admin) return;
+      if(el.dataset.st!=="free") return;
+      picked=(picked&&picked.t===t)?null:{d:selDay,t,k};
+      renderDay(); renderBar();
+    };
+  });
+}
+
+function renderBar(){
+  const bar=document.getElementById("bar");
+  if(!picked||admin){bar.classList.remove("on");return;}
+  const date=new Date(picked.d+"T00:00:00"), info=KIND[picked.k];
+  document.getElementById("barT").textContent=(date.getMonth()+1)+"/"+date.getDate()+
+    " 周"+CN[date.getDay()]+"  "+picked.t;
+  document.getElementById("barK").textContent=info.label+" · 约"+info.h+"小时";
+  bar.classList.add("on");
+}
+
+/* ---------- 客人提交 ---------- */
+document.getElementById("goBtn").onclick=()=>{
+  if(!picked) return;
+  const d=new Date(picked.d+"T00:00:00"), info=KIND[picked.k];
+  document.getElementById("shSub").textContent=
+    (d.getMonth()+1)+"月"+d.getDate()+"日 周"+CN[d.getDay()]+" · "+picked.t+" — "+
+    endT(picked.t,info.h)+" · "+info.label;
+  document.getElementById("sheet").hidden=false;
+};
+document.getElementById("cancelBtn").onclick=()=>document.getElementById("sheet").hidden=true;
+document.getElementById("submitBtn").onclick=async()=>{
+  const name=document.getElementById("fName").value.trim();
+  const wx=document.getElementById("fWx").value.trim();
+  if(!name) return alert("留个称呼吧");
+  if(!wx) return alert("留下微信号我才能找到你");
+  await load(mkey(view));
+  if(slotState(picked.d,{t:picked.t})!=="free"&&reqAt(picked.d,picked.t))
+    { alert("抱歉，这个时段刚被人约走了"); document.getElementById("sheet").hidden=true;
+      renderMonth(); renderDay(); return; }
+  const id="r"+Date.now()+Math.floor(Math.random()*900+100);
+  db.req[id]={id,d:picked.d,t:picked.t,k:picked.k,name,wx,
+    note:document.getElementById("fNote").value.trim(),status:"pending",at:Date.now()};
+  await save(mkey(view));
+  mine.push(id); await saveMine();
+  document.getElementById("sheet").hidden=true;
+  picked=null; renderMonth(); renderDay(); renderBar(); renderMine();
+  alert("申请已提交。\n请微信联系 "+WECHAT+" 发定金，我确认后这个时间就正式为你留着。");
+};
+
+function renderMine(){
+  const box=document.getElementById("mine");
+  const list=mine.map(id=>db.req[id]).filter(Boolean);
+  if(admin||!list.length){box.hidden=true;return;}
+  box.hidden=false;
+  let h='<h4>我的申请</h4>';
+  list.sort((a,b)=>a.d.localeCompare(b.d)).forEach(r=>{
+    const d=new Date(r.d+"T00:00:00");
+    const cls=r.status==="confirmed"?"ok":r.status==="declined"?"no":"";
+    const s={pending:"等待确认",approved:"待付定金",confirmed:"已确认 ✓",declined:"未通过"}[r.status];
+    h+='<div class="rq '+cls+'"><span class="m">'+(d.getMonth()+1)+'/'+d.getDate()+' '+r.t+
+       ' · '+KIND[r.k].label+'</span><span class="s">'+s+'</span></div>';
+  });
+  box.innerHTML=h;
+}
+
+/* ---------- 管理端 ---------- */
+function renderInbox(){
+  const box=document.getElementById("inbox");
+  if(!admin){box.hidden=true;return;}
+  box.hidden=false;
+  const m=mkey(view);
+  const list=Object.values(db.req).filter(r=>r.d.startsWith(m)&&r.status!=="declined")
+    .sort((a,b)=>(a.status==="pending"?0:1)-(b.status==="pending"?0:1)||a.d.localeCompare(b.d));
+  const pend=list.filter(r=>r.status==="pending").length;
+  document.getElementById("pendCount").textContent=pend?("待处理 "+pend+" 条"):"管理模式";
+  if(!list.length){box.innerHTML='<h4>本月预约</h4><div class="empty">还没有申请</div>';return;}
+  let h='<h4>本月预约</h4>';
+  list.forEach(r=>{
+    const d=new Date(r.d+"T00:00:00"), info=KIND[r.k];
+    const bg={pending:'<span class="badge p">待处理</span>',approved:'<span class="badge a">待定金</span>',
+              confirmed:'<span class="badge c">已确认</span>'}[r.status];
+    h+='<div class="card"><div class="top"><span class="who">'+esc(r.name)+bg+'</span>'+
+       '<span class="when">'+(d.getMonth()+1)+'/'+d.getDate()+' 周'+CN[d.getDay()]+' '+r.t+'</span></div>'+
+       '<div class="meta">微信 '+esc(r.wx)+' · '+info.label+' 约'+info.h+'小时'+
+       (r.note?'<br>备注：'+esc(r.note):'')+'</div><div class="acts">';
+    if(r.status==="pending") h+='<button class="pri" data-a="approve" data-i="'+r.id+'">批准</button>'+
+       '<button class="warn" data-a="decline" data-i="'+r.id+'">拒绝</button>';
+    if(r.status==="approved") h+='<button class="pri" data-a="confirm" data-i="'+r.id+'">定金已收，确认</button>'+
+       '<button class="warn" data-a="decline" data-i="'+r.id+'">取消</button>';
+    if(r.status==="confirmed") h+='<button data-a="ics" data-i="'+r.id+'">加入日历</button>'+
+       '<button class="warn" data-a="decline" data-i="'+r.id+'">取消</button>';
+    h+='</div></div>';
+  });
+  box.innerHTML=h;
+  box.querySelectorAll("[data-a]").forEach(b=>{
+    b.onclick=async()=>{
+      const r=db.req[b.dataset.i], a=b.dataset.a;
+      if(a==="approve") r.status="approved";
+      if(a==="confirm"){r.status="confirmed"; downloadICS([r]);}
+      if(a==="decline"){ if(!confirm("确定要取消 "+r.name+" 的预约吗？")) return; r.status="declined"; }
+      if(a==="ics") return downloadICS([r]);
+      await save(mkey(view)); renderMonth(); renderDay(); renderInbox();
+    };
+  });
+}
+
+/* ---------- ICS 导出 ---------- */
+function icsEsc(s){return String(s||"").replace(/([,;\\])/g,"\\$1").replace(/\n/g,"\\n");}
+function stamp(d,t){return d.replace(/-/g,"")+"T"+t.replace(":","")+"00";}
+function downloadICS(list){
+  let out="BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Qistudio Paris//Booking//CN\r\nCALSCALE:GREGORIAN\r\n";
+  list.forEach(r=>{
+    const info=KIND[r.k];
+    out+="BEGIN:VEVENT\r\nUID:"+r.id+"@qistudio\r\n"+
+      "DTSTAMP:"+new Date().toISOString().replace(/[-:]/g,"").split(".")[0]+"Z\r\n"+
+      "DTSTART:"+stamp(r.d,r.t)+"\r\nDTEND:"+stamp(r.d,endT(r.t,info.h))+"\r\n"+
+      "SUMMARY:"+icsEsc("美甲 · "+r.name+"（"+info.label+"）")+"\r\n"+
+      "LOCATION:"+icsEsc(ADDR)+"\r\n"+
+      "DESCRIPTION:"+icsEsc("微信 "+r.wx+"\n"+info.label+" 约"+info.h+"小时"+(r.note?"\n备注 "+r.note:""))+
+      "\r\nEND:VEVENT\r\n";
+  });
+  out+="END:VCALENDAR\r\n";
+  const url=URL.createObjectURL(new Blob([out],{type:"text/calendar;charset=utf-8"}));
+  const a=document.createElement("a"); a.href=url;
+  a.download=(list.length>1?"qistudio-"+mkey(view):"qistudio-"+list[0].d)+".ics";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+}
+document.getElementById("icsAll").onclick=()=>{
+  const m=mkey(view);
+  const list=Object.values(db.req).filter(r=>r.d.startsWith(m)&&r.status==="confirmed");
+  if(!list.length) return alert("本月还没有已确认的预约");
+  downloadICS(list);
+};
+
+/* ---------- 控制 ---------- */
+document.getElementById("prev").onclick=()=>{view.setMonth(view.getMonth()-1);go();};
+document.getElementById("next").onclick=()=>{view.setMonth(view.getMonth()+1);go();};
+async function go(){selDay=null;picked=null;await load(mkey(view));
+  renderMonth();renderDay();renderBar();renderInbox();renderMine();}
+
+document.getElementById("adminBtn").onclick=()=>{
+  if(admin) return;
+  if(prompt("管理密码")===ADMIN_CODE){admin=true;document.getElementById("abar").hidden=false;
+    document.getElementById("bar").classList.remove("on");go();}
+};
+document.getElementById("quitBtn").onclick=()=>{admin=false;editMode=false;
+  document.getElementById("abar").hidden=true;go();};
+document.getElementById("editBtn").onclick=function(){
+  editMode=!editMode; this.textContent=editMode?"✓ 点时段开关":"关闭时段";
+};
+document.getElementById("offBtn").onclick=async()=>{
+  if(!selDay) return alert("先在日历上点一天");
+  if(db.off[selDay]) delete db.off[selDay]; else db.off[selDay]=1;
+  await save(mkey(view)); renderMonth(); renderDay();
+};
+
+document.getElementById("wxid").textContent=WECHAT;
+(async()=>{await loadMine();await go();})();
+</script>

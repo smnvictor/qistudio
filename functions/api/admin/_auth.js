@@ -14,7 +14,9 @@ export async function adminToken(env) {
 }
 
 export async function requireAdmin(request, env) {
-  return cookie(request, "qs_admin") === await adminToken(env);
+  const got = cookie(request, "qs_admin");
+  if (!got || !env.ADMIN_PASSWORD) return false;
+  return got === await adminToken(env);
 }
 
 export const unauthorized = () => Response.json({ error: "unauthorized" }, { status: 401 });

@@ -2,7 +2,9 @@ import { adminToken, unauthorized } from "./_auth.js";
 
 export async function onRequestPost({ request, env }) {
   const body = await request.json().catch(() => null);
-  if (!body || String(body.password || "") !== env.ADMIN_PASSWORD) return unauthorized();
+  if (!env.ADMIN_PASSWORD || !body || String(body.password || "") !== env.ADMIN_PASSWORD) {
+    return unauthorized();
+  }
 
   return Response.json({ admin: true }, {
     headers: {

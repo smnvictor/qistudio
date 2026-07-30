@@ -52,22 +52,22 @@ npx wrangler@latest whoami
 ## 6. Base D1
 
 ```
-npx wrangler@latest d1 create qistudio --location=weur
+npx wrangler@latest d1 create qistudio-rdv-db --location=weur
 ```
 
-Copier le `database_id` renvoyé dans `wrangler.toml`, à la place de la valeur existante :
+Reporter le `database_id` renvoyé dans `wrangler.toml`. Ne pas coller le bloc suggéré par wrangler tel quel : le binding doit rester `DB`, c'est le nom lu par les Functions.
 
 ```toml
 [[d1_databases]]
 binding = "DB"
-database_name = "qistudio"
+database_name = "qistudio-rdv-db"
 database_id = "<le-tien>"
 ```
 
 Appliquer le schéma sur la base distante :
 
 ```
-npx wrangler@latest d1 execute qistudio --remote --file schema.sql
+npx wrangler@latest d1 execute qistudio-rdv-db --remote --file schema.sql
 ```
 
 Pousser :
@@ -95,7 +95,7 @@ Le binding D1 `DB` vient de `wrangler.toml` et n'est pas à créer dans le dashb
 
 ```
 curl https://qistudio.pages.dev/api/health
-npx wrangler@latest d1 execute qistudio --remote --command "SELECT name FROM sqlite_master"
+npx wrangler@latest d1 execute qistudio-rdv-db --remote --command "SELECT name FROM sqlite_master"
 ```
 
 Attendu : `{"bookings":0}`, puis `booking`, `idx_slot_taken`, `slot_exception`.

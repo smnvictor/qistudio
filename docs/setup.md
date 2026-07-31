@@ -144,7 +144,7 @@ Attendu : `{"bookings":0}`, puis `{"bookings":[],"exceptions":[]}`, puis `bookin
 
 Ouvrir https://qistudio.pages.dev : le calendrier du mois s'affiche, tous les créneaux disponibles. Choisir un créneau, remplir le formulaire, soumettre : le créneau passe en 审核中 et la demande apparaît dans 我的申请.
 
-Le point en bas à droite de la page ouvre la connexion admin. Le mot de passe est celui posé en section 8. Une fois connectée, la barre dorée en haut affiche le nombre de demandes en attente, et chaque demande du mois porte ses boutons 批准, 拒绝, 定金已收 et 取消. Le bouton 关闭时段 fait basculer les créneaux au clic, 当天休息 ferme la journée sélectionnée.
+Le point gris en haut à gauche ouvre la connexion admin. Le mot de passe est celui posé en section 8. Une fois connectée, la barre dorée en haut affiche le nombre de demandes en attente, et chaque demande du mois porte ses boutons 批准, 拒绝, 定金已收 et 取消. Le bouton 关闭时段 fait basculer les créneaux au clic, 当天休息 ferme la journée sélectionnée.
 
 ## 10. Abonnement au calendrier
 
@@ -172,7 +172,9 @@ git push origin main
 
 ## Pour Qizhi
 
-**Se connecter** — ouvrir qistudio.pages.dev, toucher le petit point gris en bas à droite, saisir le mot de passe. La barre dorée en haut indique que le mode administration est actif. Il reste actif un mois, même après avoir fermé le navigateur.
+**Changer de langue** — le bouton en haut à gauche bascule la page entre le chinois et l'anglais.
+
+**Se connecter** — ouvrir qistudio.pages.dev, toucher le petit point gris en haut à gauche, à droite du bouton de langue, saisir le mot de passe. La barre dorée en haut indique que le mode administration est actif. Il reste actif un mois, même après avoir fermé le navigateur.
 
 **Traiter une demande** — les demandes du mois s'affichent sous le calendrier, les nouvelles en premier.
 

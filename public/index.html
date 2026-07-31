@@ -14,7 +14,7 @@
        -webkit-font-smoothing:antialiased;padding:0 0 128px}
   .wrap{max-width:760px;margin:0 auto;padding:0 20px}
   h1{font-family:var(--serif);font-weight:400;font-size:clamp(34px,9vw,56px);margin:0;line-height:1}
-  header{padding:40px 0 20px;text-align:center}
+  header{padding:24px 0 20px;text-align:center}
   .brand{font-size:11px;letter-spacing:.42em;text-transform:uppercase;color:var(--muted);margin-bottom:24px}
   .brand b{color:var(--ink);font-weight:600}
   .monthline{display:flex;align-items:center;justify-content:center;gap:20px}
@@ -121,9 +121,14 @@
     color:var(--muted);line-height:2;text-align:center}
   footer b{color:var(--ink);font-weight:500;font-family:var(--mono)}
 
+  .topbar{display:flex;align-items:center;gap:12px;padding:16px 0 0}
+  #langBtn{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:2px;
+    padding:10px 14px;min-height:40px;font-family:var(--sans);font-size:11px;letter-spacing:.14em;cursor:pointer}
+  #langBtn:hover{border-color:var(--ink);color:var(--ink)}
+
   /* admin */
-  #adminBtn{position:fixed;right:16px;bottom:16px;width:26px;height:26px;border-radius:50%;
-    border:1px solid var(--line);background:var(--paper);color:#C6C0D0;cursor:pointer;font-size:11px;z-index:30}
+  #adminBtn{position:relative;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);
+    background:transparent;color:#C6C0D0;cursor:pointer;font-size:11px;padding:0}
   #adminBtn::after{content:"";position:absolute;inset:-9px}
   .abar{position:sticky;top:0;z-index:25;background:var(--gold);color:#fff;font-size:12px;
     padding:8px 16px;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
@@ -155,12 +160,17 @@
 
 <div class="abar" id="abar" hidden>
   <span id="pendCount">管理模式</span>
-  <button id="offBtn">当天休息</button>
+  <button id="offBtn" data-i="offBtn">当天休息</button>
   <button id="editBtn">关闭时段</button>
-  <button id="quitBtn">退出</button>
+  <button id="quitBtn" data-i="quit">退出</button>
 </div>
 
 <div class="wrap">
+  <div class="topbar">
+    <button id="langBtn">English</button>
+    <button id="adminBtn" aria-label="管理">·</button>
+  </div>
+
   <header>
     <div class="brand"><b>Qistudio</b> Paris · Nail Atelier</div>
     <div class="monthline">
@@ -168,20 +178,15 @@
       <button id="next" aria-label="下个月">›</button>
     </div>
     <div class="yr" id="ytitle"></div>
-    <p class="note">选好时间提交申请，我确认后会通知你。<b>收到定金才算正式约上。</b></p>
+    <p class="note"><span data-i="noteA"></span><b data-i="noteB"></b></p>
   </header>
 
-  <div class="legend">
-    <span><i class="chip teal"></i>简单款式 2小时</span>
-    <span><i class="chip rose"></i>不限款式 3小时</span>
-    <span><i class="chip amber"></i>审核中</span>
-    <span><i class="chip gone"></i>已约满</span>
-  </div>
+  <div class="legend" id="legend"></div>
 
   <div class="neterr" id="neterr" hidden></div>
 
   <div class="cal">
-    <div class="dow"><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div><div>日</div></div>
+    <div class="dow" id="dow"></div>
     <div class="grid" id="grid"></div>
   </div>
 
@@ -189,40 +194,38 @@
   <section class="inbox" id="inbox" hidden></section>
   <section class="mine" id="mine" hidden></section>
 
-  <footer>预约微信 <b id="wxid"></b><br>Vanves 92170 · 确认后发送具体地址</footer>
+  <footer><span id="ft1"></span> <b id="wxid"></b><br><span id="ft2"></span></footer>
 </div>
 
 <div class="bar" id="bar"><div class="in">
   <div class="txt"><div id="barT"></div><div id="barK"></div></div>
-  <button id="goBtn">填写申请</button>
+  <button id="goBtn" data-i="go">填写申请</button>
 </div></div>
 
 <div class="sheet" id="sheet" hidden><div class="in">
-  <h3 id="shT">提交预约申请</h3>
+  <h3 id="shT" data-i="shT">提交预约申请</h3>
   <div class="sub" id="shSub"></div>
-  <label>你的称呼</label><input id="fName" placeholder="怎么称呼你">
-  <label>微信号</label><input id="fWx" placeholder="方便我联系你确认定金">
-  <label>想做的款式 / 备注（可不填）</label><textarea id="fNote" placeholder="比如：法式、猫眼、想参考的图"></textarea>
+  <label data-i="lName">你的称呼</label><input id="fName" data-ph="phName">
+  <label data-i="lWx">微信号</label><input id="fWx" data-ph="phWx">
+  <label data-i="lNote">想做的款式 / 备注（可不填）</label><textarea id="fNote" data-ph="phNote"></textarea>
   <div class="msg" id="shMsg" hidden></div>
-  <button class="btn" id="submitBtn">提交申请</button>
-  <button class="btn ghost" id="cancelBtn">再看看</button>
+  <button class="btn" id="submitBtn" data-i="submit">提交申请</button>
+  <button class="btn ghost" id="cancelBtn" data-i="back">再看看</button>
 </div></div>
 
 <div class="sheet" id="csheet" hidden><div class="in">
   <h3 id="cText"></h3>
-  <button class="btn" id="cYes">确定</button>
-  <button class="btn ghost" id="cNo">再想想</button>
+  <button class="btn" id="cYes" data-i="yes">确定</button>
+  <button class="btn ghost" id="cNo" data-i="no">再想想</button>
 </div></div>
 
 <div class="sheet" id="asheet" hidden><div class="in">
-  <h3>管理登录</h3>
-  <label>密码</label><input id="aPwd" type="password" autocomplete="current-password">
+  <h3 data-i="aT">管理登录</h3>
+  <label data-i="lPwd">密码</label><input id="aPwd" type="password" autocomplete="current-password">
   <div class="msg" id="aMsg" hidden></div>
-  <button class="btn" id="aLogin">进入</button>
-  <button class="btn ghost" id="aCancel">取消</button>
+  <button class="btn" id="aLogin" data-i="aEnter">进入</button>
+  <button class="btn ghost" id="aCancel" data-i="aCancel">取消</button>
 </div></div>
-
-<button id="adminBtn" aria-label="管理">·</button>
 
 <!-- ========== 设置区（只有这里需要改） ========== -->
 <script type="application/json" id="cfg">
@@ -239,20 +242,104 @@
     "6": [{"t":"11:00","k":"full"},{"t":"14:00","k":"full"},{"t":"17:00","k":"full"},{"t":"20:00","k":"full"}],
     "0": [{"t":"11:00","k":"simple"},{"t":"16:00","k":"full"},{"t":"19:00","k":"full"}]
   },
-  "kind": {"simple":{"label":"简单款式","h":2,"deposit":5},"full":{"label":"不限款式","h":3,"deposit":7}}
+  "kind": {
+    "simple":{"label":"简单款式","label_en":"Simple designs","h":2,"deposit":5},
+    "full":{"label":"不限款式","label_en":"Any design","h":3,"deposit":7}
+  }
 }
 </script>
 <!-- ============================================ -->
 
+<script type="application/json" id="i18n">
+{
+"zh":{
+  "lang":"English","title":"Qistudio Paris · 预约","admin":"管理",
+  "prevM":"上个月","nextM":"下个月",
+  "dow":["一","二","三","四","五","六","日"],
+  "noteA":"选好时间提交申请，我确认后会通知你。","noteB":"收到定金才算正式约上。",
+  "legTaken":"已约满","tagOff":"休息","tagFull":"已满",
+  "st":{"free":"可约","pending":"审核中","taken":"已约","off":"不开放","past":"已过"},
+  "ast":{"pending":"待处理","approved":"待定金","confirmed":"已确认"},
+  "picked":"已选 ✓","emptyDay":"这天没有开放的时段",
+  "go":"填写申请","shT":"提交预约申请",
+  "lName":"你的称呼","phName":"怎么称呼你",
+  "lWx":"微信号","phWx":"方便我联系你确认定金",
+  "lNote":"想做的款式 / 备注（可不填）","phNote":"比如：法式、猫眼、想参考的图",
+  "submit":"提交申请","back":"再看看",
+  "needName":"留个称呼吧","needWx":"留下微信号我才能找到你",
+  "taken409":"抱歉，这个时段刚被人约走了","failSubmit":"提交失败，请重试",
+  "sentA":"申请已提交。请微信联系 ","sentB":" 发定金，我确认后这个时间就正式为你留着。",
+  "loadFail":"加载失败，请检查网络后重新打开页面",
+  "exc409":"这个时段有客人的预约，先在下面处理","pickDay":"先在日历上点一天",
+  "mineH":"我的申请",
+  "mst":{"pending":"等待确认","approved":"待付定金","confirmed":"已确认 ✓","declined":"未通过","cancelled":"已取消"},
+  "adminMode":"管理模式","pendA":"待处理 ","pendB":" 条",
+  "offBtn":"当天休息","editOff":"关闭时段","editOn":"✓ 点时段开关","quit":"退出",
+  "inboxH":"本月预约","noReq":"还没有申请",
+  "badge":{"pending":"待处理","approved":"待定金","confirmed":"已确认"},
+  "wxLabel":"微信","noteLabel":"备注：",
+  "bApprove":"批准","bDecline":"拒绝","bConfirm":"定金已收，确认","bCancel":"取消",
+  "askA":"确定要取消 ","askB":" 的预约吗？",
+  "yes":"确定","no":"再想想",
+  "aT":"管理登录","lPwd":"密码","aEnter":"进入","aCancel":"取消","badPwd":"密码不对",
+  "footWx":"预约微信","footAddr":"确认后发送具体地址"
+},
+"en":{
+  "lang":"中文","title":"Qistudio Paris · Booking","admin":"Admin",
+  "prevM":"Previous month","nextM":"Next month",
+  "dow":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+  "noteA":"Pick a time and send a request. I'll let you know once I've reviewed it. ",
+  "noteB":"A slot is only final once the deposit is received.",
+  "legTaken":"Fully booked","tagOff":"Closed","tagFull":"Full",
+  "st":{"free":"Available","pending":"Pending","taken":"Booked","off":"Closed","past":"Past"},
+  "ast":{"pending":"To review","approved":"Deposit due","confirmed":"Confirmed"},
+  "picked":"Selected ✓","emptyDay":"No slots open on this day",
+  "go":"Request this slot","shT":"Booking request",
+  "lName":"Your name","phName":"What should I call you?",
+  "lWx":"WeChat ID","phWx":"So I can reach you about the deposit",
+  "lNote":"Style or notes (optional)","phNote":"e.g. French, cat eye, a reference photo",
+  "submit":"Send request","back":"Keep looking",
+  "needName":"Please leave a name","needWx":"Leave your WeChat ID so I can reach you",
+  "taken409":"Sorry, that slot was just taken","failSubmit":"Could not send. Please try again",
+  "sentA":"Request sent. Message ","sentB":" on WeChat to send the deposit — once I confirm it, the slot is yours.",
+  "loadFail":"Loading failed. Check your connection and reopen the page",
+  "exc409":"A client has booked this slot — handle it below first","pickDay":"Pick a day on the calendar first",
+  "mineH":"My requests",
+  "mst":{"pending":"Awaiting review","approved":"Deposit due","confirmed":"Confirmed ✓","declined":"Declined","cancelled":"Cancelled"},
+  "adminMode":"Admin mode","pendA":"","pendB":" to review",
+  "offBtn":"Close this day","editOff":"Close slots","editOn":"✓ Tap a slot","quit":"Log out",
+  "inboxH":"This month","noReq":"No requests yet",
+  "badge":{"pending":"To review","approved":"Deposit due","confirmed":"Confirmed"},
+  "wxLabel":"WeChat","noteLabel":"Note: ",
+  "bApprove":"Approve","bDecline":"Decline","bConfirm":"Deposit received","bCancel":"Cancel",
+  "askA":"Cancel the booking for ","askB":"?",
+  "yes":"Confirm","no":"Go back",
+  "aT":"Admin login","lPwd":"Password","aEnter":"Enter","aCancel":"Cancel","badPwd":"Wrong password",
+  "footWx":"Book on WeChat","footAddr":"exact address sent after confirmation"
+}
+}
+</script>
+
 <script>
 const CFG=JSON.parse(document.getElementById("cfg").textContent);
 const WECHAT=CFG.wechat, MONTHS_AHEAD=CFG.monthsAhead, ADDR=CFG.addr, RULES=CFG.rules, KIND=CFG.kind;
+const STR=JSON.parse(document.getElementById("i18n").textContent);
 
 const CN=["日","一","二","三","四","五","六"];
+const DOW_EN=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const MON_EN=["January","February","March","April","May","June","July","August","September","October","November","December"];
 const today=new Date(); today.setHours(0,0,0,0);
 let view=new Date(today.getFullYear(),today.getMonth(),1);
+let lang="zh";
 let selDay=null,picked=null,admin=false,editMode=false,mine=[],inbox=[];
 let db={req:{},blocked:{},off:{}};
+
+const T=k=>STR[lang][k];
+const zh=()=>lang==="zh";
+const wd=d=>zh()?"周"+CN[d.getDay()]:DOW_EN[d.getDay()];
+const md=d=>zh()?(d.getMonth()+1)+"月"+d.getDate()+"日":MON_EN[d.getMonth()].slice(0,3)+" "+d.getDate();
+const dur=h=>zh()?"约"+h+"小时":h+" hrs";
+const kLabel=k=>zh()?KIND[k].label:KIND[k].label_en;
 
 const pad=n=>String(n).padStart(2,"0");
 const key=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
@@ -276,6 +363,30 @@ function slotState(d,s){
   return "free";
 }
 
+/* ---------- 语言 ---------- */
+function applyLang(){
+  document.title=T("title");
+  document.getElementById("langBtn").textContent=T("lang");
+  document.getElementById("adminBtn").setAttribute("aria-label",T("admin"));
+  document.getElementById("prev").setAttribute("aria-label",T("prevM"));
+  document.getElementById("next").setAttribute("aria-label",T("nextM"));
+  document.querySelectorAll("[data-i]").forEach(e=>{e.textContent=T(e.dataset.i);});
+  document.querySelectorAll("[data-ph]").forEach(e=>{e.placeholder=T(e.dataset.ph);});
+  document.getElementById("dow").innerHTML=T("dow").map(d=>"<div>"+d+"</div>").join("");
+  document.getElementById("legend").innerHTML=
+    '<span><i class="chip teal"></i>'+kLabel("simple")+' · '+dur(KIND.simple.h)+'</span>'+
+    '<span><i class="chip rose"></i>'+kLabel("full")+' · '+dur(KIND.full.h)+'</span>'+
+    '<span><i class="chip amber"></i>'+T("st").pending+'</span>'+
+    '<span><i class="chip gone"></i>'+T("legTaken")+'</span>';
+  document.getElementById("editBtn").textContent=editMode?T("editOn"):T("editOff");
+  document.getElementById("ft1").textContent=T("footWx");
+  document.getElementById("ft2").textContent=ADDR+" · "+T("footAddr");
+}
+document.getElementById("langBtn").onclick=()=>{
+  lang=zh()?"en":"zh";
+  applyLang(); renderMonth(); renderDay(); renderBar(); renderInbox(); renderMine();
+};
+
 /* ---------- 存取 ---------- */
 async function load(m){
   db={req:{},blocked:{},off:{}};
@@ -286,7 +397,7 @@ async function load(m){
     o.bookings.forEach(b=>{db.req[b.id]=b;});
     o.exceptions.forEach(e=>{if(e.t) db.blocked[sid(e.d,e.t)]=1; else db.off[e.d]=1;});
     note("");
-  }catch(e){note("加载失败，请检查网络后重新打开页面");}
+  }catch(e){note(T("loadFail"));}
   cal.classList.remove("busy");
 }
 async function refresh(){
@@ -298,7 +409,7 @@ async function toggleException(date,time){
   const r=await fetch("/api/admin/exception",{method:"POST",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({date,time})}).catch(()=>null);
   await refresh();
-  if(r&&r.status===409) note("这个时段有客人的预约，先在下面处理");
+  if(r&&r.status===409) note(T("exc409"));
 }
 async function loadMine(){
   try{const r=await fetch("/api/mine"); mine=(await r.json()).bookings;}catch(e){mine=[];}
@@ -306,7 +417,7 @@ async function loadMine(){
 
 /* ---------- 日历 ---------- */
 function renderMonth(){
-  document.getElementById("mtitle").textContent=(view.getMonth()+1)+"月";
+  document.getElementById("mtitle").textContent=zh()?(view.getMonth()+1)+"月":MON_EN[view.getMonth()];
   document.getElementById("ytitle").textContent=view.getFullYear();
   const first=new Date(view.getFullYear(),view.getMonth(),1);
   const lead=(first.getDay()+6)%7;
@@ -326,8 +437,8 @@ function renderMonth(){
       o.className=sts[i]==="free"?(s.k==="full"?"rose":"teal"):(sts[i]==="pending"?"amber":"gone");
       dots.appendChild(o);});
     b.appendChild(dots);
-    if(db.off[dk]&&date>=today){const f=document.createElement("span");f.className="tag";f.textContent="休息";b.appendChild(f);}
-    else if(slots.length&&free===0&&date>=today){const f=document.createElement("span");f.className="tag";f.textContent="已满";b.appendChild(f);}
+    if(db.off[dk]&&date>=today){const f=document.createElement("span");f.className="tag";f.textContent=T("tagOff");b.appendChild(f);}
+    else if(slots.length&&free===0&&date>=today){const f=document.createElement("span");f.className="tag";f.textContent=T("tagFull");b.appendChild(f);}
     if(!gone||admin) b.onclick=()=>{selDay=dk;picked=null;renderMonth();renderDay();renderBar();};
     else b.disabled=true;
     g.appendChild(b);
@@ -341,22 +452,22 @@ function renderDay(){
   const box=document.getElementById("day");
   if(!selDay){box.innerHTML="";return;}
   const date=new Date(selDay+"T00:00:00"), slots=RULES[date.getDay()]||[];
-  let h='<div class="dayhead"><h2>'+(date.getMonth()+1)+'月'+date.getDate()+
-        '日 <span style="font-size:15px;color:var(--muted)">周'+CN[date.getDay()]+'</span>'+
-        (db.off[selDay]?'<span class="badge">休息</span>':'')+
+  let h='<div class="dayhead"><h2>'+md(date)+
+        ' <span style="font-size:15px;color:var(--muted)">'+wd(date)+'</span>'+
+        (db.off[selDay]?'<span class="badge">'+T("tagOff")+'</span>':'')+
         '</h2><em>'+selDay+'</em></div>';
-  if(!slots.length){box.innerHTML=h+'<div class="empty">这天没有开放的时段</div>';return;}
+  if(!slots.length){box.innerHTML=h+'<div class="empty">'+T("emptyDay")+'</div>';return;}
   slots.forEach(s=>{
     const st=slotState(selDay,s), info=KIND[s.k], r=reqAt(selDay,s.t);
-    let label={free:"可约",pending:"审核中",taken:"已约",off:"不开放",past:"已过"}[st];
-    if(admin&&r) label=(r.status==="pending"?"待处理":r.status==="approved"?"待定金":"已确认")+(r.name?" · "+r.name:"");
-    if(picked&&picked.t===s.t&&!admin) label="已选 ✓";
+    let label=T("st")[st];
+    if(admin&&r) label=T("ast")[r.status]+(r.name?" · "+r.name:"");
+    if(picked&&picked.t===s.t&&!admin) label=T("picked");
     const cls=["slot","k-"+s.k,"st-"+st,(st==="free"||st==="pending")?"":"off",
                (picked&&picked.t===s.t)?"picked":""].join(" ");
     h+='<button class="'+cls+'" data-t="'+s.t+'" data-k="'+s.k+'" data-st="'+st+'">'+
        '<span class="swatch"></span><span class="bd"><span>'+
        '<span class="t">'+s.t+'<span>— '+endT(s.t,info.h)+'</span></span>'+
-       '<span class="k"><b>'+info.label+'</b> · 约'+info.h+'小时</span></span>'+
+       '<span class="k"><b>'+kLabel(s.k)+'</b> · '+dur(info.h)+'</span></span>'+
        '<span class="state">'+esc(label)+'</span></span></button>';
   });
   box.innerHTML=h;
@@ -377,8 +488,8 @@ function renderBar(){
   if(!picked||admin){bar.classList.remove("on");return;}
   const date=new Date(picked.d+"T00:00:00"), info=KIND[picked.k];
   document.getElementById("barT").textContent=(date.getMonth()+1)+"/"+date.getDate()+
-    " 周"+CN[date.getDay()]+"  "+picked.t;
-  document.getElementById("barK").textContent=info.label+" · 约"+info.h+"小时";
+    " "+wd(date)+"  "+picked.t;
+  document.getElementById("barK").textContent=kLabel(picked.k)+" · "+dur(info.h);
   bar.classList.add("on");
 }
 
@@ -387,8 +498,7 @@ document.getElementById("goBtn").onclick=()=>{
   if(!picked) return;
   const d=new Date(picked.d+"T00:00:00"), info=KIND[picked.k];
   document.getElementById("shSub").textContent=
-    (d.getMonth()+1)+"月"+d.getDate()+"日 周"+CN[d.getDay()]+" · "+picked.t+" — "+
-    endT(picked.t,info.h)+" · "+info.label;
+    md(d)+" "+wd(d)+" · "+picked.t+" — "+endT(picked.t,info.h)+" · "+kLabel(picked.k);
   document.getElementById("sheet").hidden=false;
 };
 document.getElementById("cancelBtn").onclick=()=>{document.getElementById("sheet").hidden=true;msg("");};
@@ -396,18 +506,18 @@ const msg=t=>{const e=document.getElementById("shMsg");e.textContent=t;e.hidden=
 document.getElementById("submitBtn").onclick=async()=>{
   const name=document.getElementById("fName").value.trim();
   const wx=document.getElementById("fWx").value.trim();
-  if(!name) return msg("留个称呼吧");
-  if(!wx) return msg("留下微信号我才能找到你");
+  if(!name) return msg(T("needName"));
+  if(!wx) return msg(T("needWx"));
   msg("");
   const r=await fetch("/api/request",{method:"POST",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({date:picked.d,time:picked.t,name,wechat:wx,
       note:document.getElementById("fNote").value.trim()})}).catch(()=>null);
-  if(r&&r.status===409){msg("抱歉，这个时段刚被人约走了");await go();return;}
-  if(!r||!r.ok) return msg("提交失败，请重试");
+  if(r&&r.status===409){msg(T("taken409"));await go();return;}
+  if(!r||!r.ok) return msg(T("failSubmit"));
   document.getElementById("fName").value="";
   document.getElementById("fWx").value="";
   document.getElementById("fNote").value="";
-  msg("申请已提交。请微信联系 "+WECHAT+" 发定金，我确认后这个时间就正式为你留着。");
+  msg(T("sentA")+WECHAT+T("sentB"));
   await loadMine(); await go();
 };
 
@@ -415,14 +525,12 @@ function renderMine(){
   const box=document.getElementById("mine");
   if(admin||!mine.length){box.hidden=true;return;}
   box.hidden=false;
-  let h='<h4>我的申请</h4>';
+  let h='<h4>'+T("mineH")+'</h4>';
   mine.forEach(r=>{
     const d=new Date(r.d+"T00:00:00");
     const cls=r.status==="confirmed"?"ok":(r.status==="declined"||r.status==="cancelled")?"no":"";
-    const s={pending:"等待确认",approved:"待付定金",confirmed:"已确认 ✓",
-             declined:"未通过",cancelled:"已取消"}[r.status];
     h+='<div class="rq '+cls+'"><span class="m">'+(d.getMonth()+1)+'/'+d.getDate()+' '+r.t+
-       ' · '+KIND[r.k].label+'</span><span class="s">'+s+'</span></div>';
+       ' · '+kLabel(r.k)+'</span><span class="s">'+T("mst")[r.status]+'</span></div>';
   });
   box.innerHTML=h;
 }
@@ -444,29 +552,29 @@ function renderInbox(){
   if(!admin){box.hidden=true;return;}
   box.hidden=false;
   const pend=inbox.filter(r=>r.status==="pending").length;
-  document.getElementById("pendCount").textContent=pend?("待处理 "+pend+" 条"):"管理模式";
-  if(!inbox.length){box.innerHTML='<h4>本月预约</h4><div class="empty">还没有申请</div>';return;}
-  let h='<h4>本月预约</h4>';
+  document.getElementById("pendCount").textContent=pend?(T("pendA")+pend+T("pendB")):T("adminMode");
+  if(!inbox.length){box.innerHTML='<h4>'+T("inboxH")+'</h4><div class="empty">'+T("noReq")+'</div>';return;}
+  let h='<h4>'+T("inboxH")+'</h4>';
   inbox.forEach(r=>{
     const d=new Date(r.d+"T00:00:00"), info=KIND[r.k];
-    const bg={pending:'<span class="badge p">待处理</span>',approved:'<span class="badge a">待定金</span>',
-              confirmed:'<span class="badge c">已确认</span>'}[r.status];
+    const cl={pending:"p",approved:"a",confirmed:"c"}[r.status];
+    const bg=cl?'<span class="badge '+cl+'">'+T("badge")[r.status]+'</span>':"";
     h+='<div class="card"><div class="top"><span class="who">'+esc(r.name)+bg+'</span>'+
-       '<span class="when">'+(d.getMonth()+1)+'/'+d.getDate()+' 周'+CN[d.getDay()]+' '+r.t+'</span></div>'+
-       '<div class="meta">微信 '+esc(r.wx)+' · '+info.label+' 约'+info.h+'小时'+
-       (r.note?'<br>备注：'+esc(r.note):'')+'</div><div class="acts">';
-    if(r.status==="pending") h+='<button class="pri" data-a="approved" data-i="'+r.id+'">批准</button>'+
-       '<button class="warn" data-a="declined" data-i="'+r.id+'">拒绝</button>';
-    if(r.status==="approved") h+='<button class="pri" data-a="confirmed" data-i="'+r.id+'">定金已收，确认</button>'+
-       '<button class="warn" data-a="cancelled" data-i="'+r.id+'">取消</button>';
-    if(r.status==="confirmed") h+='<button class="warn" data-a="cancelled" data-i="'+r.id+'">取消</button>';
+       '<span class="when">'+(d.getMonth()+1)+'/'+d.getDate()+' '+wd(d)+' '+r.t+'</span></div>'+
+       '<div class="meta">'+T("wxLabel")+' '+esc(r.wx)+' · '+kLabel(r.k)+' '+dur(info.h)+
+       (r.note?'<br>'+T("noteLabel")+esc(r.note):'')+'</div><div class="acts">';
+    if(r.status==="pending") h+='<button class="pri" data-a="approved" data-i2="'+r.id+'">'+T("bApprove")+'</button>'+
+       '<button class="warn" data-a="declined" data-i2="'+r.id+'">'+T("bDecline")+'</button>';
+    if(r.status==="approved") h+='<button class="pri" data-a="confirmed" data-i2="'+r.id+'">'+T("bConfirm")+'</button>'+
+       '<button class="warn" data-a="cancelled" data-i2="'+r.id+'">'+T("bCancel")+'</button>';
+    if(r.status==="confirmed") h+='<button class="warn" data-a="cancelled" data-i2="'+r.id+'">'+T("bCancel")+'</button>';
     h+='</div></div>';
   });
   box.innerHTML=h;
   box.querySelectorAll("[data-a]").forEach(b=>{
     b.onclick=async()=>{
-      const a=b.dataset.a, r=inbox.find(x=>x.id===b.dataset.i);
-      if((a==="declined"||a==="cancelled")&&!await ask("确定要取消 "+r.name+" 的预约吗？")) return;
+      const a=b.dataset.a, r=inbox.find(x=>x.id===b.dataset.i2);
+      if((a==="declined"||a==="cancelled")&&!await ask(T("askA")+r.name+T("askB"))) return;
       await fetch("/api/admin/booking/"+r.id+"/status",{method:"POST",
         headers:{"Content-Type":"application/json"},body:JSON.stringify({status:a})}).catch(()=>null);
       await go();
@@ -491,7 +599,7 @@ document.getElementById("aCancel").onclick=()=>document.getElementById("asheet")
 document.getElementById("aLogin").onclick=async()=>{
   const r=await fetch("/api/admin/login",{method:"POST",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({password:document.getElementById("aPwd").value})}).catch(()=>null);
-  if(!r||!r.ok){const e=document.getElementById("aMsg");e.textContent="密码不对";e.hidden=false;return;}
+  if(!r||!r.ok){const e=document.getElementById("aMsg");e.textContent=T("badPwd");e.hidden=false;return;}
   document.getElementById("asheet").hidden=true;
   admin=true; document.getElementById("abar").hidden=false;
   document.getElementById("bar").classList.remove("on"); go();
@@ -499,17 +607,19 @@ document.getElementById("aLogin").onclick=async()=>{
 document.getElementById("quitBtn").onclick=async()=>{
   await fetch("/api/admin/logout",{method:"POST"}).catch(()=>{});
   admin=false; editMode=false;
+  document.getElementById("editBtn").textContent=T("editOff");
   document.getElementById("abar").hidden=true; go();
 };
 document.getElementById("editBtn").onclick=function(){
-  editMode=!editMode; this.textContent=editMode?"✓ 点时段开关":"关闭时段";
+  editMode=!editMode; this.textContent=editMode?T("editOn"):T("editOff");
 };
 document.getElementById("offBtn").onclick=()=>{
-  if(!selDay) return note("先在日历上点一天");
+  if(!selDay) return note(T("pickDay"));
   toggleException(selDay,null);
 };
 
 document.getElementById("wxid").textContent=WECHAT;
+applyLang();
 (async()=>{
   try{admin=(await (await fetch("/api/admin/session")).json()).admin;}catch(e){}
   if(admin) document.getElementById("abar").hidden=false;

@@ -8,7 +8,7 @@ export async function onRequestGet({ request, env }) {
 
   const r = await env.DB.prepare(
     "SELECT id, date AS d, time AS t, service AS k, client_name AS name, wechat_id AS wx, note, status " +
-    "FROM booking WHERE substr(date,1,7) = ?1 AND status IN ('pending','approved','confirmed') " +
+    "FROM booking WHERE substr(date,1,7) = ?1 AND status IN ('pending','confirmed') " +
     "ORDER BY CASE status WHEN 'pending' THEN 0 ELSE 1 END, date, time"
   ).bind(m).all();
 

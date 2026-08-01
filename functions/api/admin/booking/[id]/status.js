@@ -1,8 +1,7 @@
 import { requireAdmin, unauthorized } from "../../_auth.js";
 
 const NEXT = {
-  pending: ["approved", "declined"],
-  approved: ["confirmed", "cancelled"],
+  pending: ["confirmed", "declined"],
   confirmed: ["cancelled"]
 };
 

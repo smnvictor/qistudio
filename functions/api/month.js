@@ -4,7 +4,7 @@ export async function onRequestGet({ request, env }) {
 
   const bookings = await env.DB.prepare(
     "SELECT id, date AS d, time AS t, service AS k, status FROM booking " +
-    "WHERE substr(date,1,7) = ?1 AND status IN ('pending','approved','confirmed')"
+    "WHERE substr(date,1,7) = ?1 AND status IN ('pending','confirmed')"
   ).bind(m).all();
 
   const exceptions = await env.DB.prepare(

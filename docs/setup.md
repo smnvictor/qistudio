@@ -142,9 +142,13 @@ npx wrangler@latest d1 execute qistudio-rdv-db --remote --command "SELECT name F
 
 Attendu : `{"bookings":0}`, puis `{"bookings":[],"exceptions":[]}`, puis `booking`, `idx_slot_taken`, `slot_exception`.
 
-Ouvrir https://qistudio.pages.dev : le calendrier du mois s'affiche, tous les créneaux disponibles. Choisir un créneau, remplir le formulaire, soumettre : le créneau passe en 审核中 et la demande apparaît dans 我的申请.
+Ouvrir https://qistudio.pages.dev : le calendrier du mois s'affiche, tous les créneaux disponibles. Les jours situés à plus de 31 jours de la date du jour sont grisés et ne réagissent pas au clic ; la flèche › s'arrête au mois contenant cette limite.
 
-Le point gris en haut à gauche ouvre la connexion admin. Le mot de passe est celui posé en section 8. Une fois connectée, la barre dorée en haut affiche le nombre de demandes en attente, et chaque demande du mois porte ses boutons 批准, 拒绝, 定金已收 et 取消. Le bouton 关闭时段 fait basculer les créneaux au clic, 当天休息 ferme la journée sélectionnée.
+Choisir un créneau, remplir le formulaire, soumettre : le formulaire se ferme, une pop-up de remerciement affiche les contacts WeChat et Instagram, le créneau passe en 审核中 et la demande apparaît dans 我的申请. Toutes les pop-up se ferment en cliquant à côté.
+
+Le bouton 价格 en haut à droite ouvre les tarifs.
+
+Le point gris en haut à gauche ouvre la connexion admin. Le mot de passe est celui posé en section 8. Une fois connectée, la barre dorée en haut affiche le nombre de demandes en attente, et chaque demande du mois porte ses boutons 批准, 拒绝 et 取消. 批准 confirme directement le rendez-vous, qui part alors dans le feed ICS. Le bouton 关闭时段 fait basculer les créneaux au clic, 当天休息 ferme la journée sélectionnée.
 
 ## 10. Abonnement au calendrier
 
@@ -172,22 +176,25 @@ git push origin main
 
 ## Pour Qizhi
 
-**Changer de langue** — le bouton en haut à gauche bascule la page entre le chinois et l'anglais.
+**Changer de langue** — le bouton en haut à gauche bascule la page entre le chinois et l'anglais. Le bouton 价格 en haut à droite ouvre les tarifs.
+
+**Fenêtre de réservation** — les clientes ne peuvent réserver que dans les 31 jours qui viennent. Au-delà, les jours sont grisés et se rouvrent seuls au fil des jours.
 
 **Se connecter** — ouvrir qistudio.pages.dev, toucher le petit point gris en haut à gauche, à droite du bouton de langue, saisir le mot de passe. La barre dorée en haut indique que le mode administration est actif. Il reste actif un mois, même après avoir fermé le navigateur.
 
 **Traiter une demande** — les demandes du mois s'affichent sous le calendrier, les nouvelles en premier.
 
-- 批准 : la cliente voit 待付定金 et sait qu'elle doit envoyer le dépôt
+- 批准 : le rendez-vous passe en 已确认 et apparaît dans le calendrier de l'iPhone
 - 拒绝 : le créneau redevient libre
-- 定金已收，确认 : le rendez-vous passe en 已确认 et apparaît dans le calendrier de l'iPhone
-- 取消 : annule un rendez-vous déjà approuvé ou confirmé, le créneau redevient libre
+- 取消 : annule un rendez-vous confirmé, le créneau redevient libre
 
 **Fermer une journée** — toucher le jour dans le calendrier, puis 当天休息. Le jour porte le badge 休息 et plus aucun créneau n'est réservable. Toucher 当天休息 à nouveau rouvre la journée.
 
 **Fermer un seul créneau** — toucher 关闭时段, puis toucher le créneau à fermer. Le toucher à nouveau le rouvre. Toucher 关闭时段 une seconde fois quitte ce mode.
 
 Un créneau qui a déjà une demande ne peut pas être fermé : traiter la demande d'abord.
+
+**Lire le calendrier de l'iPhone** — chaque rendez-vous confirmé apparaît sur son créneau horaire sous la forme 💅 suivi de l'heure de début, sans autre détail.
 
 **Rafraîchir le calendrier de l'iPhone** — l'app Calendrier se met à jour toute seule, entre quinze minutes et quelques heures après un changement. Pour forcer : ouvrir l'app Calendrier, aller dans la liste des événements et tirer l'écran vers le bas.
 

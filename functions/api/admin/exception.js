@@ -1,6 +1,6 @@
 import { requireAdmin, unauthorized } from "./_auth.js";
 
-const ACTIVE = "status IN ('pending','approved','confirmed')";
+const ACTIVE = "status IN ('pending','confirmed')";
 
 export async function onRequestPost({ request, env }) {
   if (!await requireAdmin(request, env)) return unauthorized();

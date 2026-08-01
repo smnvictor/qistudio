@@ -12,7 +12,7 @@ CREATE TABLE booking (
 );
 
 CREATE UNIQUE INDEX idx_slot_taken ON booking(date, time)
-  WHERE status IN ('pending','approved','confirmed');
+  WHERE status IN ('pending','confirmed');
 
 CREATE TABLE slot_exception (
   date   TEXT NOT NULL,

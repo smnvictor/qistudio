@@ -33,9 +33,10 @@ async function notify(env, c, b) {
 const bad = (error) => Response.json({ error }, { status: 400 });
 const paris = (opts) => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", ...opts }).format(new Date());
 
-function maxMonth(today, ahead) {
-  const m = +today.slice(5, 7) - 1 + ahead;
-  return (+today.slice(0, 4) + Math.floor(m / 12)) + "-" + String((m % 12) + 1).padStart(2, "0");
+function maxDate(today, ahead) {
+  const d = new Date(today + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + ahead);
+  return d.toISOString().slice(0, 10);
 }
 
 export async function onRequestPost({ request, env, waitUntil }) {
@@ -55,7 +56,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
 
   const today = paris({ year: "numeric", month: "2-digit", day: "2-digit" });
   if (date < today) return bad("past date");
-  if (date.slice(0, 7) > maxMonth(today, c.monthsAhead)) return bad("out of window");
+  if (date > maxDate(today, c.daysAhead)) return bad("out of window");
 
   const slot = (c.rules[String(new Date(date + "T00:00:00Z").getUTCDay())] || []).find(s => s.t === time);
   if (!slot) return bad("bad slot");

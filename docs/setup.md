@@ -144,11 +144,11 @@ Attendu : `{"bookings":0}`, puis `{"bookings":[],"exceptions":[]}`, puis `bookin
 
 Ouvrir https://qistudio.pages.dev : le calendrier du mois s'affiche, tous les créneaux disponibles. Les jours situés à plus de 31 jours de la date du jour sont grisés et ne réagissent pas au clic ; la flèche › s'arrête au mois contenant cette limite.
 
-Choisir un créneau, remplir le formulaire, soumettre : le formulaire se ferme, une pop-up de remerciement affiche les contacts WeChat et Instagram, le créneau passe en 审核中 et la demande apparaît dans 我的申请. Toutes les pop-up se ferment en cliquant à côté.
+Toucher un créneau libre : il se déroule et affiche les styles inclus. Toucher 填写申请, remplir le formulaire, soumettre : le formulaire se ferme, une pop-up de remerciement affiche les contacts WeChat et Instagram, le créneau passe en 审核中 et la demande apparaît dans 我的申请. Toutes les pop-up se ferment en cliquant à côté.
 
 Le bouton 价格 en haut à droite ouvre les tarifs.
 
-Le point gris en haut à gauche ouvre la connexion admin. Le mot de passe est celui posé en section 8. Une fois connectée, la barre dorée en haut affiche le nombre de demandes en attente, et chaque demande du mois porte ses boutons 批准, 拒绝 et 取消. 批准 confirme directement le rendez-vous, qui part alors dans le feed ICS. Le bouton 关闭时段 fait basculer les créneaux au clic, 当天休息 ferme la journée sélectionnée.
+Le bouton rond en haut à gauche ouvre la connexion admin. Le mot de passe est celui posé en section 8. Une fois connectée, la barre bordeaux en haut affiche le nombre de demandes en attente, et chaque demande du mois porte ses boutons 批准, 拒绝 et 取消. 批准 confirme directement le rendez-vous, qui part alors dans le feed ICS. Le bouton 关闭时段 fait basculer les créneaux au clic, 当天休息 ferme la journée sélectionnée.
 
 ## 10. Abonnement au calendrier
 
@@ -180,7 +180,7 @@ git push origin main
 
 **Fenêtre de réservation** — les clientes ne peuvent réserver que dans les 31 jours qui viennent. Au-delà, les jours sont grisés et se rouvrent seuls au fil des jours.
 
-**Se connecter** — ouvrir qistudio.pages.dev, toucher le petit point gris en haut à gauche, à droite du bouton de langue, saisir le mot de passe. La barre dorée en haut indique que le mode administration est actif. Il reste actif un mois, même après avoir fermé le navigateur.
+**Se connecter** — ouvrir qistudio.pages.dev, toucher le petit bouton rond en haut à gauche, à droite du bouton de langue, saisir le mot de passe. La barre bordeaux en haut indique que le mode administration est actif. Il reste actif un mois, même après avoir fermé le navigateur.
 
 **Traiter une demande** — les demandes du mois s'affichent sous le calendrier, les nouvelles en premier.
 
@@ -198,4 +198,4 @@ Un créneau qui a déjà une demande ne peut pas être fermé : traiter la deman
 
 **Rafraîchir le calendrier de l'iPhone** — l'app Calendrier se met à jour toute seule, entre quinze minutes et quelques heures après un changement. Pour forcer : ouvrir l'app Calendrier, aller dans la liste des événements et tirer l'écran vers le bas.
 
-**Quitter le mode administration** — 退出 dans la barre dorée.
+**Quitter le mode administration** — 退出 dans la barre bordeaux.

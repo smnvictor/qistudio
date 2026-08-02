@@ -28,16 +28,10 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
-    min-height:100vh;padding:18px 14px 56px;
+    min-height:100vh;padding:18px 28px 56px;
     font-family:var(--display);font-optical-sizing:auto;color:var(--wine);
     -webkit-font-smoothing:antialiased;position:relative;overflow-x:hidden;
-    background:
-      radial-gradient(ellipse 75% 38% at 100%   6%, #DEEEF7 0%, rgba(222,238,247,0) 62%),
-      radial-gradient(ellipse 85% 30% at   8%  66%, #DCEEF7 0%, rgba(220,238,247,0) 66%),
-      radial-gradient(ellipse 60% 34% at   0%   1%, #FAFAF9 0%, rgba(250,250,249,0) 56%),
-      radial-gradient(ellipse 75% 24% at  55% 101%, #F8F9FA 0%, rgba(248,249,250,0) 62%),
-      linear-gradient(180deg,#F7F8F9 0%,#E9F2F7 46%,#F3F6F8 100%);
-    background-attachment:fixed;
+    background:#F1F5F8 url("background.jpg") center top / cover no-repeat fixed;
   }
   body::after{
     content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.055;
@@ -78,7 +72,7 @@
   /* ---------- titre ---------- */
   header{text-align:center;padding:32px 0 26px}
   .brand{font-family:var(--script);font-weight:400;font-size:clamp(30px,6.6vw,46px);
-    line-height:1.25;letter-spacing:.01em;color:var(--wine)}
+    line-height:1.25;letter-spacing:.01em;color:#474C52}
   .monthline{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:16px}
   .monthline button{
     width:48px;height:48px;border-radius:50%;
@@ -92,13 +86,14 @@
     box-shadow:0 10px 24px rgba(68,24,40,.10)}
   .monthline button:disabled{opacity:.28;cursor:default;box-shadow:none}
   h1{font-family:var(--display);font-weight:500;font-size:clamp(50px,12vw,80px);
-    line-height:1;letter-spacing:.005em;color:var(--wine);margin:0}
+    line-height:1;letter-spacing:.005em;color:#474C52;margin:0}
   body.zh h1{font-family:var(--zh-display);font-weight:400;letter-spacing:.04em}
   .yr{font-family:var(--display);font-size:15px;letter-spacing:.30em;
-    color:var(--wine-soft);margin-top:13px}
+    color:#474C52;margin-top:13px}
   .intro{font-family:var(--display);font-size:15px;line-height:1.75;
-    color:var(--wine);max-width:62ch;margin:24px auto 0}
+    color:#474C52;margin:24px auto 0}
   body.zh .intro{font-family:var(--zh);font-weight:300;line-height:1.95;letter-spacing:.02em}
+  .iline{display:block;white-space:nowrap}
 
   /* ---------- légende ---------- */
   .legend{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin:28px auto 22px}
@@ -285,7 +280,7 @@
 
   /* ---------- feuilles / popups ---------- */
   .sheet{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;
-    background:rgba(68,24,40,.34);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+    background:rgba(24,38,62,.34);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
   .sheet .in{background:#fff;width:100%;max-width:520px;
     border-radius:var(--r-card) var(--r-card) 0 0;
     padding:28px 22px calc(28px + env(safe-area-inset-bottom));
@@ -305,15 +300,64 @@
   .done p{font-family:var(--note);font-size:18px;line-height:1.75;color:var(--grey);
     margin:0 0 20px;text-align:center}
   body.zh .done p{font-family:var(--zh);font-size:14px;font-weight:300;line-height:1.9}
-  .ct,.price{display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+  .ct{display:flex;justify-content:space-between;align-items:baseline;gap:14px;
     padding:14px 0;border-top:1px solid rgba(100,101,101,.18)}
-  .ct span,.price .n{font-family:var(--note);font-size:17px;color:var(--grey)}
-  body.zh .ct span,body.zh .price .n{font-family:var(--zh);font-size:14px;font-weight:300}
+  .ct span{font-family:var(--note);font-size:17px;color:var(--grey)}
+  body.zh .ct span{font-family:var(--zh);font-size:14px;font-weight:300}
   .ct b{font-family:var(--display);font-weight:500;font-size:16px;letter-spacing:.06em;color:var(--wine)}
-  .price .n span{display:block;font-family:var(--note);font-size:15px;color:var(--grey-faint);margin-top:4px}
-  body.zh .price .n span{font-family:var(--zh);font-size:13px}
-  .price .v{font-family:var(--display);font-size:19px;color:var(--time);white-space:nowrap}
-  body.zh .price .v{font-family:var(--zh);font-size:17px}
+
+  /* ---------- 价目表 ---------- */
+  .sheet.mid.wide{padding:24px 16px}
+  .sheet.mid.wide .in{max-width:900px;max-height:88vh;overflow-y:auto;
+    background:var(--card);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);
+    border:1px solid var(--card-edge);border-radius:26px;
+    box-shadow:0 30px 80px rgba(71,76,82,.14);
+    padding:28px clamp(22px,4.5vw,54px) 44px;scrollbar-width:thin}
+  .sheet.mid.wide .in::-webkit-scrollbar{width:6px}
+  .sheet.mid.wide .in::-webkit-scrollbar-thumb{background:rgba(100,101,101,.2);border-radius:6px}
+  .pclose{position:absolute;right:22px;top:22px;width:36px;height:36px;border-radius:50%;
+    background:var(--surface);border:1px solid var(--card-edge);padding:0;
+    display:grid;place-items:center;cursor:pointer;
+    color:var(--grey);font-family:var(--display);font-size:17px;
+    transition:transform .25s var(--ease),color .25s,background .25s}
+  .pclose:hover{transform:rotate(90deg);color:var(--wine);background:#fff}
+  .ptitle{font-family:var(--display);font-weight:500;
+    font-size:clamp(40px,6vw,58px);line-height:1;color:#474C52;
+    text-align:center;padding:14px 0 44px}
+  body.zh .ptitle{font-family:var(--zh-display);font-weight:400;
+    font-size:clamp(32px,5vw,46px);letter-spacing:.04em}
+  .pgroup{margin-bottom:46px}
+  .pgroup:last-of-type{margin-bottom:36px}
+  .pgroup-title{font-family:var(--display);font-weight:500;
+    font-size:clamp(24px,3.2vw,31px);line-height:1.15;color:#474C52;margin-bottom:4px}
+  body.zh .pgroup-title{font-family:var(--zh-display);font-weight:400;font-size:clamp(21px,2.8vw,26px)}
+  .pgroup-title.solo{margin-bottom:20px}
+  .pgroup-sub{font-family:var(--note);font-size:15px;color:var(--grey-faint);
+    margin-bottom:20px;font-style:italic}
+  body.zh .pgroup-sub{font-family:var(--zh);font-style:normal;font-size:14px;font-weight:300}
+  .prows{display:grid;grid-template-columns:1fr 1fr;gap:2px 46px}
+  .prows.single{grid-template-columns:1fr}
+  .prow{display:flex;align-items:baseline;justify-content:space-between;gap:20px;
+    padding:11px 12px;border-radius:12px;transition:background .25s}
+  .prow:hover{background:rgba(255,255,255,.62)}
+  .prow .n{font-family:var(--note);font-size:17px;color:var(--grey);line-height:1.5}
+  body.zh .prow .n{font-family:var(--zh);font-size:16px;font-weight:300}
+  .prow .v{font-family:var(--note);font-size:24px;color:var(--time);
+    white-space:nowrap;letter-spacing:.01em}
+  .prow .v.q{font-family:var(--display);font-size:14px;color:var(--st-custom);
+    letter-spacing:.04em;font-style:italic}
+  body.zh .prow .v.q{font-family:var(--zh);font-style:normal;font-size:14px;font-weight:300}
+  .prow .u{font-family:var(--display);font-style:normal;font-size:13px;
+    color:var(--grey-faint);margin-left:3px}
+  body.zh .prow .u{font-family:var(--zh)}
+  .pgroup-note{font-family:var(--note);font-size:14px;color:var(--grey-faint);
+    padding:14px 12px 0;line-height:1.7}
+  body.zh .pgroup-note{font-family:var(--zh);font-size:13.5px;font-weight:300}
+  .pnote{margin-top:8px;padding:26px 12px 0;position:relative;
+    font-family:var(--note);font-size:15px;line-height:1.9;color:var(--grey-soft)}
+  body.zh .pnote{font-family:var(--zh);font-size:14px;font-weight:300}
+  .pnote::before{content:"";position:absolute;left:12px;right:12px;top:0;height:1px;
+    background:linear-gradient(90deg,rgba(71,76,82,.22),transparent)}
 
   label{display:block;font-family:var(--display);font-size:13px;letter-spacing:.18em;
     text-transform:uppercase;color:var(--grey-soft);margin:18px 0 9px}
@@ -346,7 +390,7 @@
   body.zh .foot-sub{font-family:var(--zh);font-size:13px;font-weight:300}
 
   @media (min-width:860px){
-    body{padding:26px 20px 70px}
+    body{padding:26px 20px 70px;background-size:150% auto}
     .pill{font-size:15px;padding:9px 26px}
     header{padding:44px 0 34px}
     .brand{font-size:clamp(38px,3.4vw,46px)}
@@ -359,6 +403,7 @@
     .mk.b{width:14px}
     .marks{gap:8px;min-height:13px}
     .cal{padding:28px clamp(10px,2vw,26px) 26px}
+    .cal,.day{max-width:780px;margin-left:auto;margin-right:auto}
     .dow{padding-bottom:16px}
     .dow div{font-size:17px}
     .cell{min-height:118px;gap:16px}
@@ -382,7 +427,18 @@
     .foot-link,.handle{font-size:16px}
     .foot-sub{font-size:15px}
   }
-  @media (max-width:520px){body{padding:16px 12px 48px}}
+  @media (max-width:760px){
+    .prows{grid-template-columns:1fr;gap:0}
+    .sheet.mid.wide{padding:16px 10px}
+    .sheet.mid.wide .in{padding:22px 16px 34px;border-radius:22px;max-height:92vh}
+    .ptitle{padding:10px 0 32px}
+    .pclose{right:14px;top:16px}
+    .pgroup{margin-bottom:34px}
+    .prow{padding:10px}
+    .prow .n,body.zh .prow .n{font-size:15px}
+    .prow .v{font-size:21px}
+  }
+  @media (max-width:520px){body{padding:16px 24px 48px}}
   [hidden]{display:none!important}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
   :focus-visible{outline:2px solid var(--st-custom);outline-offset:3px;border-radius:14px}
@@ -409,7 +465,7 @@
       <button id="next" aria-label="下个月">&rsaquo;</button>
     </div>
     <div class="yr" id="ytitle"></div>
-    <p class="intro" data-i="intro"></p>
+    <p class="intro" id="intro"></p>
   </header>
 
   <div class="legend" id="legend"></div>
@@ -460,9 +516,9 @@
   <p id="dEnd" style="margin:20px 0 0"></p>
 </div></div>
 
-<div class="sheet mid" id="psheet" hidden><div class="in">
-  <button class="x" id="pClose" data-al="close">✕</button>
-  <h3 data-i="pT">价格</h3>
+<div class="sheet mid wide" id="psheet" hidden><div class="in">
+  <button class="pclose" id="pClose" data-al="close">×</button>
+  <div class="ptitle" id="pTitle"></div>
   <div id="pList"></div>
 </div></div>
 
@@ -477,7 +533,7 @@
 <!-- ========== 设置区（只有这里需要改） ========== -->
 <script type="application/json" id="cfg">
 {
-  "wechat": "qistudio_paris",
+  "wechat": "QistudioParis",
   "instagram": "@qi_studio_paris",
   "daysAhead": 31,
   "addr": "Vanves 92170",
@@ -501,6 +557,59 @@
       "incl_en":["Everything in Simple Set","Hand-painted art","Rhinestones & charms","French tips","Detailed custom work"],
       "note":"手绘较多的款式，请提前发参考图，方便我预留足够时间。",
       "note_en":"For heavily hand-painted sets, send your reference images in advance so enough time can be set aside."}
+  },
+  "prices": {
+    "note":"总价包含单色 / 延长，以及所需的款式附加、饰品与卸甲，价格以欧元结算。\n如需准确报价，可以通过微信或 Instagram 联系我哦～",
+    "note_en":"Your total covers one base or extension, plus any add-ons, decorations and removal. Prices are settled in euros.\nFor an exact quote, message me on WeChat or Instagram.",
+    "groups":[
+      {"t":"本甲","t_en":"Base gel","sub":"包建构","sub_en":"Structure included","single":true,
+       "rows":[
+         {"n":"纯色单色","n_en":"Solid single colour","p":"€30"}
+       ]},
+      {"t":"延长","t_en":"Extensions","sub":"包建构","sub_en":"Structure included",
+       "rows":[
+         {"n":"全贴甲片","n_en":"Full cover tips","p":"€35"},
+         {"n":"甲膜延长","n_en":"Sculpted extensions","p":"€35"},
+         {"n":"浅贴延长 / 延短","n_en":"Half-well tips · longer or shorter","p":"€40"},
+         {"n":"甲片二次利用","n_en":"Reusing your previous tips","p":"€30"}
+       ]},
+      {"t":"款式附加","t_en":"Style add-ons",
+       "rows":[
+         {"n":"遮游离线","n_en":"Covering the grow-out line","q":"免费","q_en":"Free"},
+         {"n":"单色","n_en":"Single colour","p":"€5"},
+         {"n":"醋酸","zhOnly":true,"p":"€5","u":"/根"},
+         {"n":"亮片","n_en":"Glitter","p":"€10"},
+         {"n":"波点","n_en":"Polka dots","p":"€10"},
+         {"n":"后建构","zhOnly":true,"p":"€10"},
+         {"n":"渐变 / 腮红","n_en":"Ombré / Blush","p":"€10"},
+         {"n":"晕染","n_en":"Smudge shading","p":"€10–15"},
+         {"n":"法式","n_en":"French","p":"€15"},
+         {"n":"极光粉 / 魔镜粉","n_en":"Aurora / Mirror chrome","p":"€15"},
+         {"n":"猫眼","n_en":"Cat-eye","p":"€15"},
+         {"n":"手绘","n_en":"Hand-painted","q":"按款式报价","q_en":"Quoted per design"},
+         {"n":"复杂款式","n_en":"Complex designs","q":"咨询报价","q_en":"Ask for a quote"}
+       ]},
+      {"t":"饰品","t_en":"Decorations",
+       "rows":[
+         {"n":"小饰品 / 贴纸","n_en":"Small charms / stickers","p":"€5–10"},
+         {"n":"钻球 / 雕花","n_en":"Rhinestone balls / carved décor","p":"€5","u":"/个","u_en":"/each"},
+         {"n":"钢珠","zhOnly":true,"q":"按款式报价"}
+       ]},
+      {"t":"特殊","t_en":"Special",
+       "rows":[
+         {"n":"龙爪","n_en":"Dragon claw","p":"€50"},
+         {"n":"猫爪","n_en":"Cat claw","p":"€40"},
+         {"n":"断甲修补","n_en":"Broken nail repair","p":"€5","u":"/根","u_en":"/nail"},
+         {"n":"单独贴甲片","n_en":"Single tip application","p":"€5","u":"/根","u_en":"/nail"}
+       ]},
+      {"t":"卸甲","t_en":"Removal",
+       "note":"本店作品免费卸除。","note_en":"Removal is free for sets made here.",
+       "rows":[
+         {"n":"指甲油","n_en":"Regular polish","p":"€5"},
+         {"n":"本甲","n_en":"Gel on natural nails","p":"€10"},
+         {"n":"延长 / 大饰品","n_en":"Extensions / large decorations","p":"€15"}
+       ]}
+    ]
   }
 }
 </script>
@@ -541,7 +650,7 @@
   "askA":"确定要取消 ","askB":" 的预约吗？",
   "yes":"确定","no":"再想想",
   "aT":"管理登录","lPwd":"密码","aEnter":"进入","aCancel":"取消","badPwd":"密码不对",
-  "pT":"价格","perHour":"小时","close":"关闭",
+  "pT":"价格","pTitle":"价目表","perHour":"小时","close":"关闭",
   "footWx":"联系微信","footAddr":"确认后发送具体地址"
 },
 "en":{
@@ -577,7 +686,7 @@
   "askA":"Cancel the booking for ","askB":"?",
   "yes":"Confirm","no":"Go back",
   "aT":"Admin login","lPwd":"Password","aEnter":"Enter","aCancel":"Cancel","badPwd":"Wrong password",
-  "pT":"Prices","perHour":"hour","close":"Close",
+  "pT":"Prices","pTitle":"Price list","perHour":"hour","close":"Close",
   "footWx":"Contact me on WeChat","footAddr":"exact address sent after confirmation"
 }
 }
@@ -586,7 +695,7 @@
 <script>
 const CFG=JSON.parse(document.getElementById("cfg").textContent);
 const WECHAT=CFG.wechat, INSTA=CFG.instagram, DAYS_AHEAD=CFG.daysAhead,
-      ADDR=CFG.addr, RULES=CFG.rules, KIND=CFG.kind;
+      ADDR=CFG.addr, RULES=CFG.rules, KIND=CFG.kind, PRICES=CFG.prices;
 const STR=JSON.parse(document.getElementById("i18n").textContent);
 
 const CN=["日","一","二","三","四","五","六"];
@@ -663,11 +772,50 @@ function applyLang(){
   document.getElementById("dAsk").textContent=T("okAsk");
   document.getElementById("dWxL").textContent=T("wxLabel");
   document.getElementById("dEnd").textContent=T("okEnd");
-  document.getElementById("pList").innerHTML=Object.keys(KIND).map(k=>
-    '<div class="price"><span class="n">'+kLabel(k)+'<span>'+dur(KIND[k].h)+'</span></span>'+
-    '<span class="v">'+KIND[k].price+' € / '+T("perHour")+'</span></div>').join("");
+  document.getElementById("pTitle").textContent=T("pTitle");
+  document.getElementById("pList").innerHTML=renderPrices();
   document.getElementById("ft1").textContent=T("footWx");
   document.getElementById("ft2").textContent=ADDR+" · "+T("footAddr");
+  renderIntro();
+}
+
+/* ---------- 介绍：每句一行，按宽度缩放 ---------- */
+function renderIntro(){
+  const el=document.getElementById("intro");
+  const parts=T("intro").split(zh()?/(?<=。)/:/(?<=\.)\s+/).map(s=>s.trim()).filter(Boolean);
+  el.innerHTML=parts.map(s=>'<span class="iline"><span>'+esc(s)+'</span></span>').join("");
+  fitIntro();
+}
+function fitIntro(){
+  const el=document.getElementById("intro");
+  el.style.fontSize="";
+  const w=el.clientWidth;
+  if(!w) return;
+  for(let i=0;i<6;i++){
+    let max=0;
+    el.querySelectorAll(".iline > span").forEach(n=>{max=Math.max(max,n.getBoundingClientRect().width);});
+    if(max<=w) return;
+    el.style.fontSize=(parseFloat(getComputedStyle(el).fontSize)*w/max*.995)+"px";
+  }
+}
+
+/* ---------- 价目表 ---------- */
+function renderPrices(){
+  const tx=(o,k)=>zh()?o[k]:(o[k+"_en"]||o[k]);
+  return PRICES.groups.map(g=>{
+    const rows=g.rows.filter(r=>zh()||!r.zhOnly).map(r=>
+      '<div class="prow"><span class="n">'+esc(tx(r,"n"))+'</span>'+
+      (r.q!==undefined
+        ? '<span class="v q">'+esc(tx(r,"q"))+'</span>'
+        : '<span class="v">'+esc(r.p)+(r.u?'<span class="u">'+esc(tx(r,"u"))+'</span>':'')+'</span>')+
+      '</div>').join("");
+    return '<div class="pgroup">'+
+      '<div class="pgroup-title'+(g.sub?'':' solo')+'">'+esc(tx(g,"t"))+'</div>'+
+      (g.sub?'<div class="pgroup-sub">'+esc(tx(g,"sub"))+'</div>':'')+
+      '<div class="prows'+(g.single?' single':'')+'">'+rows+'</div>'+
+      (g.note?'<p class="pgroup-note">'+esc(tx(g,"note"))+'</p>':'')+
+      '</div>';
+  }).join("")+'<p class="pnote">'+esc(tx(PRICES,"note")).replace(/\n/g,"<br>")+'</p>';
 }
 document.getElementById("langBtn").onclick=()=>{
   lang=zh()?"en":"zh"; picked=null;
@@ -947,6 +1095,8 @@ document.getElementById("igid").textContent=INSTA;
 document.getElementById("dWx").textContent=WECHAT;
 document.getElementById("dIg").textContent=INSTA;
 applyLang();
+addEventListener("resize",fitIntro);
+if(document.fonts) document.fonts.ready.then(fitIntro);
 (async()=>{
   try{admin=(await (await fetch("/api/admin/session")).json()).admin;}catch(e){}
   if(admin) document.getElementById("abar").hidden=false;

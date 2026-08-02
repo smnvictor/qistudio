@@ -148,8 +148,6 @@
   .cell.sel{background:#fff;border-color:rgba(174,163,195,.55);box-shadow:0 10px 22px rgba(68,24,40,.10)}
   .cell .d{font-family:var(--display);font-size:17px;font-weight:400;color:var(--grey);letter-spacing:.02em}
   .marks{display:flex;gap:6px;align-items:center;min-height:11px}
-  .cell .tag{font-family:var(--note);font-size:13px;color:var(--grey-faint);margin-top:-6px}
-  body.zh .cell .tag{font-family:var(--zh);font-size:11px}
   .cell.off{cursor:default}
   .cell.off .d{color:var(--grey-faint)}
 
@@ -393,7 +391,7 @@
 <div class="wrap">
   <div class="abar" id="abar" hidden>
     <span id="pendCount">管理模式</span>
-    <button id="offBtn" data-i="offBtn">当天休息</button>
+    <button id="offBtn">关闭日期</button>
     <button id="editBtn">关闭时段</button>
     <button id="quitBtn" data-i="quit">退出</button>
   </div>
@@ -515,7 +513,7 @@
   "prevM":"上个月","nextM":"下个月",
   "dow":["一","二","三","四","五","六","日"],
   "intro":"请选择预约时间并提交申请，我们将在微信或 Instagram 与您确认。收到定金后，我们将为您保留该预约时段。",
-  "legTaken":"已约满","tagOff":"休息","tagFull":"已满",
+  "legTaken":"已约 / 关闭","tagOff":"休息",
   "st":{"free":"可约","pending":"审核中","taken":"已约","off":"不开放","past":"已过"},
   "ast":{"pending":"待处理","confirmed":"已确认"},
   "picked":"已选 ✓","emptyDay":"这天没有开放的时段",
@@ -531,11 +529,11 @@
   "okAsk":"请通过微信或 Instagram 联系我来确认预约时间～",
   "okEnd":"收到定金后，就正式帮你保留预约啦 ✨",
   "loadFail":"加载失败，请检查网络后重新打开页面",
-  "exc409":"这个时段有客人的预约，先在下面处理","pickDay":"先在日历上点一天",
+  "exc409":"这个时段有客人的预约，先在下面处理",
   "mineH":"我的申请",
   "mst":{"pending":"等待确认","confirmed":"已确认 ✓","declined":"未通过","cancelled":"已取消"},
   "adminMode":"管理模式","pendA":"待处理 ","pendB":" 条",
-  "offBtn":"当天休息","editOff":"关闭时段","editOn":"✓ 点时段开关","quit":"退出",
+  "offBtn":"关闭日期","offOn":"✓ 点日期开关","editOff":"关闭时段","editOn":"✓ 点时段开关","quit":"退出",
   "inboxH":"本月预约","noReq":"还没有申请",
   "badge":{"pending":"待处理","confirmed":"已确认"},
   "wxLabel":"微信","noteLabel":"备注：",
@@ -551,7 +549,7 @@
   "prevM":"Previous month","nextM":"Next month",
   "dow":["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
   "intro":"Please select your preferred appointment time and submit your request. We will confirm your booking via WeChat or Instagram. Your appointment will be secured once the deposit has been received.",
-  "legTaken":"Fully booked","tagOff":"Closed","tagFull":"Full",
+  "legTaken":"Booked / Closed","tagOff":"Closed",
   "st":{"free":"Available","pending":"Pending","taken":"Booked","off":"Closed","past":"Past"},
   "ast":{"pending":"To review","confirmed":"Confirmed"},
   "picked":"Selected ✓","emptyDay":"No slots open on this day",
@@ -567,11 +565,11 @@
   "okAsk":"Please send me a message on WeChat or Instagram so we can confirm your appointment.",
   "okEnd":"Once the deposit is received, your appointment will be officially reserved. ✨",
   "loadFail":"Loading failed. Check your connection and reopen the page",
-  "exc409":"A client has booked this slot — handle it below first","pickDay":"Pick a day on the calendar first",
+  "exc409":"A client has booked this slot — handle it below first",
   "mineH":"My requests",
   "mst":{"pending":"Awaiting review","confirmed":"Confirmed ✓","declined":"Declined","cancelled":"Cancelled"},
   "adminMode":"Admin mode","pendA":"","pendB":" to review",
-  "offBtn":"Close this day","editOff":"Close slots","editOn":"✓ Tap a slot","quit":"Log out",
+  "offBtn":"Close days","offOn":"✓ Tap a day","editOff":"Close slots","editOn":"✓ Tap a slot","quit":"Log out",
   "inboxH":"This month","noReq":"No requests yet",
   "badge":{"pending":"To review","confirmed":"Confirmed"},
   "wxLabel":"WeChat","noteLabel":"Note: ",
@@ -597,7 +595,7 @@ const MON_EN=["January","February","March","April","May","June","July","August",
 let today=new Date(); today.setHours(0,0,0,0);
 let view=new Date(today.getFullYear(),today.getMonth(),1);
 let lang="zh";
-let selDay=null,picked=null,admin=false,editMode=false,mine=[],inbox=[];
+let selDay=null,picked=null,admin=false,editMode=false,dayMode=false,mine=[],inbox=[];
 let db={req:{},blocked:{},off:{}};
 
 const T=k=>STR[lang][k];
@@ -660,6 +658,7 @@ function applyLang(){
     '<span class="lg"><span class="mkbox"><i class="mk r"></i></span>'+T("st").pending+'</span>'+
     '<span class="lg"><span class="mkbox"><i class="mk b"></i></span>'+T("legTaken")+'</span>';
   document.getElementById("editBtn").textContent=editMode?T("editOn"):T("editOff");
+  document.getElementById("offBtn").textContent=dayMode?T("offOn"):T("offBtn");
   document.getElementById("dT").textContent=T("okThanks");
   document.getElementById("dAsk").textContent=T("okAsk");
   document.getElementById("dWxL").textContent=T("wxLabel");
@@ -727,9 +726,10 @@ function renderMonth(){
       o.className="mk "+(sts[i]==="free"?(s.k==="full"?"c":"s"):(sts[i]==="pending"?"r":"b"));
       marks.appendChild(o);});
     b.appendChild(marks);
-    if(db.off[dk]&&date>=today&&!beyond){const f=document.createElement("div");f.className="tag";f.textContent=T("tagOff");b.appendChild(f);}
-    else if(slots.length&&free===0&&date>=today&&!beyond){const f=document.createElement("div");f.className="tag";f.textContent=T("tagFull");b.appendChild(f);}
-    if((!gone||admin)&&!beyond) b.onclick=()=>{selDay=dk;picked=null;renderMonth();renderDay();};
+    if((!gone||admin)&&!beyond) b.onclick=()=>{
+      if(admin&&dayMode&&date>=today) return toggleException(dk,null);
+      selDay=dk;picked=null;renderMonth();renderDay();
+    };
     else b.disabled=true;
     g.appendChild(b);
   }
@@ -919,17 +919,16 @@ document.getElementById("aLogin").onclick=async()=>{
 };
 document.getElementById("quitBtn").onclick=async()=>{
   await fetch("/api/admin/logout",{method:"POST"}).catch(()=>{});
-  admin=false; editMode=false;
-  document.getElementById("editBtn").textContent=T("editOff");
+  admin=false; editMode=false; dayMode=false; applyLang();
   document.getElementById("abar").hidden=true; go();
 };
-document.getElementById("editBtn").onclick=function(){
-  editMode=!editMode; this.textContent=editMode?T("editOn"):T("editOff");
-  renderDay();
+document.getElementById("editBtn").onclick=()=>{
+  editMode=!editMode; if(editMode) dayMode=false;
+  applyLang(); renderDay();
 };
 document.getElementById("offBtn").onclick=()=>{
-  if(!selDay) return note(T("pickDay"));
-  toggleException(selDay,null);
+  dayMode=!dayMode; if(dayMode) editMode=false;
+  applyLang(); renderDay();
 };
 
 document.getElementById("priceBtn").onclick=()=>{document.getElementById("psheet").hidden=false;};

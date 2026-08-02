@@ -148,7 +148,7 @@ Toucher un créneau libre : il se déroule et affiche les styles inclus. Toucher
 
 Le bouton 价格 en haut à droite ouvre les tarifs.
 
-Le bouton rond en haut à gauche ouvre la connexion admin. Le mot de passe est celui posé en section 8. Une fois connectée, la barre bordeaux en haut affiche le nombre de demandes en attente, et chaque demande du mois porte ses boutons 批准, 拒绝 et 取消. 批准 confirme directement le rendez-vous, qui part alors dans le feed ICS. Le bouton 关闭时段 fait basculer les créneaux au clic, 当天休息 ferme la journée sélectionnée.
+Le bouton rond en haut à gauche ouvre la connexion admin. Le mot de passe est celui posé en section 8. Une fois connectée, la barre bordeaux en haut affiche le nombre de demandes en attente, et chaque demande du mois porte ses boutons 批准, 拒绝 et 取消. 批准 confirme directement le rendez-vous, qui part alors dans le feed ICS. Le bouton 关闭时段 fait basculer les créneaux au clic, 关闭日期 fait basculer les journées entières au clic.
 
 ## 10. Abonnement au calendrier
 
@@ -188,9 +188,11 @@ git push origin main
 - 拒绝 : le créneau redevient libre
 - 取消 : annule un rendez-vous confirmé, le créneau redevient libre
 
-**Fermer une journée** — toucher le jour dans le calendrier, puis 当天休息. Le jour porte le badge 休息 et plus aucun créneau n'est réservable. Toucher 当天休息 à nouveau rouvre la journée.
+**Fermer une journée** — toucher 关闭日期, puis toucher dans le calendrier les jours à fermer. Toucher un jour déjà fermé le rouvre. Un jour fermé n'affiche plus que des tirets gris et porte le badge 休息 quand on l'ouvre. Toucher 关闭日期 une seconde fois quitte ce mode.
 
 **Fermer un seul créneau** — toucher 关闭时段, puis toucher le créneau à fermer. Le toucher à nouveau le rouvre. Toucher 关闭时段 une seconde fois quitte ce mode.
+
+Les deux modes s'excluent : activer l'un désactive l'autre.
 
 Un créneau qui a déjà une demande ne peut pas être fermé : traiter la demande d'abord.
 

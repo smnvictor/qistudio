@@ -8,7 +8,7 @@
 
 <style>
   :root{
-    --wine:#441828; --wine-soft:#6B3A48;
+    --wine:#441828; --wine-soft:#6B3A48; --btn:#474C52;
     --grey:#646565; --grey-soft:#8C8D8D; --grey-faint:#B3B4B4;
     --time:#5B6C88;
     --st-simple:#AEC6D6; --st-custom:#AEA3C3; --st-pending:#E0C889;
@@ -24,7 +24,7 @@
     --zh:"Noto Serif SC","Songti SC","PingFang SC","Microsoft YaHei","Noto Sans CJK SC",serif;
     --zh-display:"ZCOOL XiaoWei","Noto Serif SC","Songti SC","PingFang SC","Microsoft YaHei",serif;
     --ease:cubic-bezier(.22,1,.36,1);
-    --accent:var(--wine);
+    --accent:var(--btn);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
@@ -59,7 +59,7 @@
   #priceBtn{margin-left:auto}
 
   /* ---------- barre admin ---------- */
-  .abar{position:sticky;top:0;z-index:25;background:var(--wine);color:#fff;
+  .abar{position:sticky;top:0;z-index:25;background:var(--btn);color:#fff;
     border-radius:var(--r-pill);padding:9px 14px;margin-bottom:14px;
     display:flex;gap:9px;align-items:center;justify-content:center;flex-wrap:wrap;
     font-family:var(--display);font-size:14px;letter-spacing:.1em;box-shadow:var(--shadow-sm)}
@@ -73,9 +73,9 @@
   header{text-align:center;padding:32px 0 26px}
   .brand{font-family:var(--script);font-weight:400;font-size:clamp(30px,6.6vw,46px);
     line-height:1.25;letter-spacing:.01em;color:#474C52}
-  .monthline{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:16px}
+  .monthline{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px}
   .monthline button{
-    width:48px;height:48px;border-radius:50%;
+    width:48px;height:48px;flex:0 0 48px;border-radius:50%;
     background:rgba(255,255,255,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
     border:1px solid rgba(255,255,255,.9);box-shadow:var(--shadow-sm);
     display:grid;place-items:center;cursor:pointer;
@@ -85,7 +85,7 @@
   .monthline button:hover:not(:disabled){transform:translateY(-3px);color:var(--wine);
     box-shadow:0 10px 24px rgba(68,24,40,.10)}
   .monthline button:disabled{opacity:.28;cursor:default;box-shadow:none}
-  h1{font-family:var(--display);font-weight:500;font-size:clamp(50px,12vw,80px);
+  h1{font-family:var(--display);font-weight:500;font-size:clamp(34px,10.5vw,80px);
     line-height:1;letter-spacing:.005em;color:#474C52;margin:0}
   body.zh h1{font-family:var(--zh-display);font-weight:400;letter-spacing:.04em}
   .yr{font-family:var(--display);font-size:15px;letter-spacing:.30em;
@@ -104,6 +104,7 @@
     font-family:var(--display);font-size:14px;color:var(--wine);box-shadow:var(--shadow-sm);
   }
   body.zh .legend span.lg{font-family:var(--zh);letter-spacing:.04em}
+  .legend .brk{flex-basis:100%;height:0}
   .mkbox{width:14px;height:14px;display:grid;place-items:center;flex:0 0 auto}
   .mk{display:block;flex:0 0 auto}
   .mk.s{width:10px;height:10px;border-radius:50%;background:var(--st-simple)}
@@ -242,6 +243,7 @@
   .req-left{display:flex;align-items:center;gap:11px;flex-wrap:wrap;
     font-family:var(--note);font-size:16px;color:var(--grey)}
   body.zh .req-left{font-family:var(--zh);font-size:14px;font-weight:300}
+  .req-left>span:not(.t){flex-basis:100%}
   .req-left .t{font-family:var(--display);font-size:16px;color:var(--time)}
   .req-status{font-family:var(--display);font-size:13px;letter-spacing:.16em;
     text-transform:uppercase;color:var(--grey-faint);white-space:nowrap}
@@ -269,14 +271,14 @@
     transition:border-color .25s,transform .25s var(--ease)}
   body.zh .rcard .acts button{font-family:var(--zh)}
   .rcard .acts button:hover{border-color:var(--wine);transform:translateY(-2px)}
-  .rcard .acts button.pri{background:var(--wine);color:#fff;border-color:var(--wine)}
+  .rcard .acts button.pri{background:var(--btn);color:#fff;border-color:var(--btn)}
   .rcard .acts button.warn{color:var(--wine-warn)}
   .badge{display:inline-block;font-family:var(--display);font-size:12px;letter-spacing:.14em;
     padding:4px 12px;border-radius:var(--r-pill);margin-left:10px;vertical-align:middle;
     background:rgba(255,255,255,.86);border:1px solid rgba(255,255,255,.9);color:var(--grey-soft)}
   body.zh .badge{font-family:var(--zh);letter-spacing:.1em}
   .badge.p{background:rgba(224,200,137,.3);border-color:rgba(224,200,137,.55);color:#8A6E2A}
-  .badge.c{background:var(--wine);border-color:var(--wine);color:#fff}
+  .badge.c{background:var(--btn);border-color:var(--btn);color:#fff}
 
   /* ---------- feuilles / popups ---------- */
   .sheet{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;
@@ -395,10 +397,11 @@
     header{padding:44px 0 34px}
     .brand{font-size:clamp(38px,3.4vw,46px)}
     .monthline{gap:30px;margin-top:22px}
-    .monthline button{width:58px;height:58px}
+    .monthline button{width:58px;height:58px;flex-basis:58px}
     .intro{font-size:17px;margin-top:30px}
     .legend{gap:11px;margin:34px auto 26px}
     .legend span.lg{padding:8px 21px;font-size:16px}
+    .legend .brk{display:none}
     .mk.s,.mk.c,.mk.r{width:13px;height:13px}
     .mk.b{width:14px}
     .marks{gap:8px;min-height:13px}
@@ -422,6 +425,7 @@
     .req{padding:14px 24px}
     .req-left{font-size:17px}
     .req-left .t{font-size:18px}
+    .req-left>span:not(.t){flex-basis:auto}
     footer{margin-top:52px;padding-top:28px}
     .foot-links{gap:10px 30px}
     .foot-link,.handle{font-size:16px}
@@ -429,8 +433,8 @@
   }
   @media (max-width:760px){
     .prows{grid-template-columns:1fr;gap:0}
-    .sheet.mid.wide{padding:16px 10px}
-    .sheet.mid.wide .in{padding:22px 16px 34px;border-radius:22px;max-height:92vh}
+    .sheet.mid.wide{padding:16px 20px}
+    .sheet.mid.wide .in{padding:22px 16px 34px;border-radius:22px;max-height:60vh}
     .ptitle{padding:10px 0 32px}
     .pclose{right:14px;top:16px}
     .pgroup{margin-bottom:34px}
@@ -547,14 +551,14 @@
     "0": [{"t":"11:00","k":"simple"},{"t":"16:00","k":"full"},{"t":"19:00","k":"full"}]
   },
   "kind": {
-    "simple":{"label":"简单款式","label_en":"Simple designs","h":2,"deposit":5,"price":25,
-      "incl":["素甲","纯色","渐变","猫眼","珍珠镜面","延长甲","软胶甲片"],
-      "incl_en":["Natural nails","Solid colour","Ombré","Cat eye","Pearl chrome","Sculpted extensions","Soft gel tips"],
+    "simple":{"label":"简单款式","label_en":"Simple set","h":2,"deposit":5,"price":25,
+      "incl":["本甲","纯色","渐变","猫眼","珍珠魔镜粉","全贴延长","甲模延长"],
+      "incl_en":["Natural nails","Solid colour","Ombré","Cat eye","Pearl chrome","Full cover tips","Sculpted extensions"],
       "note":"不确定你想做的款式属于哪一档？微信问我，我们一起看。",
       "note_en":"Not sure whether your design fits this slot? Message me on WeChat and we'll check together."},
-    "full":{"label":"不限款式","label_en":"Any design","h":3,"deposit":7,"price":35,
-      "incl":["简单款式的全部","手绘图案","钻饰与配件","法式","精细定制"],
-      "incl_en":["Everything in Simple Set","Hand-painted art","Rhinestones & charms","French tips","Detailed custom work"],
+    "full":{"label":"不限款式","label_en":"Custom design","h":3,"deposit":7,"price":35,
+      "incl":["手绘图案","钻饰与配件","法式","雕花","浅贴延长"],
+      "incl_en":["Hand-painted art","Rhinestones & charms","French","Carved décor"],
       "note":"手绘较多的款式，请提前发参考图，方便我预留足够时间。",
       "note_en":"For heavily hand-painted sets, send your reference images in advance so enough time can be set aside."}
   },
@@ -744,7 +748,7 @@ function slotState(d,s){
   if(db.blocked[sid(d,s.t)]) return "off";
   if(new Date(d+"T"+s.t+":00").getTime()<Date.now()) return "past";
   const r=reqAt(d,s.t);
-  if(r) return r.status==="pending"?"pending":"taken";
+  if(r) return (r.status==="pending"&&admin)?"pending":"taken";
   return "free";
 }
 
@@ -762,9 +766,10 @@ function applyLang(){
   document.querySelectorAll("[data-al]").forEach(e=>{e.setAttribute("aria-label",T(e.dataset.al));});
   document.getElementById("dow").innerHTML=T("dow").map(d=>"<div>"+d+"</div>").join("");
   document.getElementById("legend").innerHTML=
-    '<span class="lg"><span class="mkbox"><i class="mk s"></i></span>'+kLabel("simple")+' · '+dur(KIND.simple.h)+'</span>'+
-    '<span class="lg"><span class="mkbox"><i class="mk c"></i></span>'+kLabel("full")+' · '+dur(KIND.full.h)+'</span>'+
-    '<span class="lg"><span class="mkbox"><i class="mk r"></i></span>'+T("st").pending+'</span>'+
+    '<span class="lg"><span class="mkbox"><i class="mk s"></i></span>'+kLabel("simple")+'</span>'+
+    '<span class="lg"><span class="mkbox"><i class="mk c"></i></span>'+kLabel("full")+'</span>'+
+    '<span class="brk"></span>'+
+    (admin?'<span class="lg"><span class="mkbox"><i class="mk r"></i></span>'+T("st").pending+'</span>':"")+
     '<span class="lg"><span class="mkbox"><i class="mk b"></i></span>'+T("legTaken")+'</span>';
   document.getElementById("editBtn").textContent=editMode?T("editOn"):T("editOff");
   document.getElementById("offBtn").textContent=dayMode?T("offOn"):T("offBtn");
@@ -1063,7 +1068,7 @@ document.getElementById("aLogin").onclick=async()=>{
     body:JSON.stringify({password:document.getElementById("aPwd").value})}).catch(()=>null);
   if(!r||!r.ok){const e=document.getElementById("aMsg");e.textContent=T("badPwd");e.hidden=false;return;}
   document.getElementById("asheet").hidden=true;
-  admin=true; document.getElementById("abar").hidden=false; go();
+  admin=true; document.getElementById("abar").hidden=false; applyLang(); go();
 };
 document.getElementById("quitBtn").onclick=async()=>{
   await fetch("/api/admin/logout",{method:"POST"}).catch(()=>{});
@@ -1099,7 +1104,7 @@ addEventListener("resize",fitIntro);
 if(document.fonts) document.fonts.ready.then(fitIntro);
 (async()=>{
   try{admin=(await (await fetch("/api/admin/session")).json()).admin;}catch(e){}
-  if(admin) document.getElementById("abar").hidden=false;
+  if(admin){document.getElementById("abar").hidden=false; applyLang();}
   await loadMine(); await go();
 })();
 </script>

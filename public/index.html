@@ -787,7 +787,8 @@ function applyLang(){
 /* ---------- 介绍：每句一行，按宽度缩放 ---------- */
 function renderIntro(){
   const el=document.getElementById("intro");
-  const parts=T("intro").split(zh()?/(?<=。)/:/(?<=\.)\s+/).map(s=>s.trim()).filter(Boolean);
+  const sep=zh()?"。":".";
+  const parts=T("intro").split(zh()?"。":/\.\s+/).map((s,i,a)=>(i<a.length-1?s+sep:s).trim()).filter(Boolean);
   el.innerHTML=parts.map(s=>'<span class="iline"><span>'+esc(s)+'</span></span>').join("");
   fitIntro();
 }

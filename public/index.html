@@ -125,14 +125,15 @@
   /* ---------- carte calendrier ---------- */
   .cal{background:var(--card);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
     border:1px solid var(--card-edge);border-radius:var(--r-card);box-shadow:var(--shadow);
-    padding:20px 6px 18px;transition:opacity .15s}
+    padding:20px 6px 18px;transition:opacity .15s;
+    display:grid;grid-template-columns:repeat(7,1fr);column-gap:5px}
   .cal.busy{opacity:.55}
-  .dow{display:grid;grid-template-columns:repeat(7,1fr);padding-bottom:14px;position:relative}
+  .dow{display:grid;grid-column:1/-1;grid-template-columns:subgrid;padding-bottom:14px;position:relative}
   .dow::after{content:"";position:absolute;left:3%;right:3%;bottom:0;height:1px;
     background:rgba(100,101,101,.22)}
-  .dow div{text-align:center;font-family:var(--display);font-size:14px;font-weight:500;color:var(--grey)}
+  .dow div{min-width:0;text-align:center;font-family:var(--display);font-size:14px;font-weight:500;color:var(--grey)}
   body.zh .dow div{font-family:var(--zh)}
-  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:12px}
+  .grid{display:grid;grid-column:1/-1;grid-template-columns:subgrid;gap:5px;margin-top:12px}
   .cell{
     border:1px solid transparent;background:transparent;border-radius:var(--r-cell);min-height:86px;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;

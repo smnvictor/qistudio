@@ -15,6 +15,10 @@ export async function onRequestPost({ request, env, params }) {
   if (!row) return Response.json({ error: "not found" }, { status: 404 });
   if (!(NEXT[row.status] || []).includes(to)) return Response.json({ error: "bad transition" }, { status: 400 });
 
-  await env.DB.prepare("UPDATE booking SET status = ?1 WHERE id = ?2").bind(to, params.id).run();
+  const result = await env.DB.prepare(
+    "UPDATE booking SET status = ?1 WHERE id = ?2 AND status = ?3 " +
+    "AND (status != 'pending' OR julianday(created_at) > julianday(?4))"
+  ).bind(to, params.id, row.status, new Date(Date.now() - 86400000).toISOString()).run();
+  if (!result.meta.changes) return Response.json({ error: "booking changed" }, { status: 409 });
   return Response.json({ id: params.id, status: to }, { headers: { "Cache-Control": "no-store" } });
 }

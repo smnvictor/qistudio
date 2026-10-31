@@ -1,3 +1,5 @@
+import { config } from "./_config.js";
+import { bookingTimes } from "./_schedule.js";
 export async function onRequestGet({ request, env }) {
   const cookie = (request.headers.get("Cookie") || "").match(/(?:^|;\s*)qs_client=([^;]+)/);
   if (!cookie) return Response.json({ bookings: [] }, { headers: { "Cache-Control": "no-store" } });
@@ -7,5 +9,5 @@ export async function onRequestGet({ request, env }) {
     "WHERE client_token = ?1 ORDER BY date, time"
   ).bind(cookie[1]).all();
 
-  return Response.json({ bookings: r.results }, { headers: { "Cache-Control": "no-store" } });
+  return Response.json({ bookings: await bookingTimes(env, await config(request, env), r.results) }, { headers: { "Cache-Control": "no-store" } });
 }

@@ -6,7 +6,7 @@ Qizhi tient un studio d'ongles à domicile à Vanves (92). Elle travaille seule 
 
 Aujourd'hui elle gère ses rendez-vous à la main, dans la conversation WeChat, et les recopie dans son calendrier. Le projet existe pour supprimer cette double saisie et donner aux clientes une vue claire de ses disponibilités.
 
-L'interface est en chinois simplifié. Il n'y a pas de compte client et aucun paiement dans l'app.
+L'interface est disponible en chinois simplifié et en anglais. Il n'y a pas de compte client et aucun paiement dans l'app.
 
 ## 2. Ce que le site fait
 
@@ -32,14 +32,14 @@ Ces exclusions sont des décisions, pas des manques à combler plus tard sans di
 - Pas de comptes clients, pas de mots de passe côté cliente
 - Pas de paiement en ligne. Le dépôt se règle par transfert WeChat et Qizhi le confirme à la main
 - Pas de messagerie interne. WeChat reste le canal de conversation
-- Pas de libération automatique des créneaux non payés. À ce volume, un refus manuel suffit
-- Pas de version française, pas d'historique client affiché, pas de galerie photo
+- Les demandes non confirmées sont annulées automatiquement après 24 heures, avec une notification Telegram
+- Pas d'historique client affiché, pas de galerie photo
 - Pas d'analytics, pas de tracking, aucun script tiers
 - Pas de multi-praticien, pas de multi-lieu
 
 ## 4. Stack
 
-Tout est chez Cloudflare, sur des offres gratuites sans restriction d'usage commercial et sans mise en veille pour inactivité.
+Le site Pages et le Worker planifié d’expiration (cron chaque minute, appel authentifié vers Pages) sont chez Cloudflare, sur des offres gratuites sans restriction d'usage commercial et sans mise en veille pour inactivité.
 
 | Rôle | Choix |
 |---|---|
@@ -72,33 +72,24 @@ Une cliente par créneau. Jamais de rendez-vous parallèles.
 |---|---|
 | Lundi à vendredi | 17:00 `simple`, 19:00 `full` |
 | Samedi | 11:00, 14:00, 17:00, 20:00 — tous `full` |
-| Dimanche | 11:00 `simple`, 16:00 `full`, 19:00 `full` |
+| Dimanche | 11:00 `simple`, 13:00 `full`, 16:00 `simple` ouverts par défaut ; 19:00 `full` fermé par défaut, ouvrable par l’admin |
 
-Réservation ouverte sur le mois courant et les deux suivants.
+Réservation ouverte sur les 31 jours à venir. Les demandes clientes sont refusées entre minuit et 6 h, heure de Paris.
 
 Ces horaires, les durées, les montants de dépôt, l'identifiant WeChat et l'adresse vivent dans **un seul objet de configuration** en haut du fichier frontend, repris tel quel du prototype. Qizhi voudra les changer selon les saisons ; ça doit être une modification d'une ligne, sans toucher à la logique.
 
 ### Exceptions
 
-Qizhi peut fermer un créneau isolé sur une date donnée, ou une journée entière. Une fermeture est toujours stockée comme une exception rattachée à une date, jamais comme une modification des règles récurrentes. Toute fermeture est réversible.
+Qizhi peut fermer un créneau isolé sur une date donnée, ou une journée entière. Une fermeture est toujours stockée comme une exception rattachée à une date, jamais comme une modification des règles récurrentes. Toute fermeture est réversible. Une exception `reason = open` ouvre un créneau ou un jour fermé par défaut ; une fermeture de journée explicite a priorité.
+
+L’admin peut ajuster la durée d’un créneau daté par pas de 30 minutes, entre 30 minutes et 12 heures, si tous les créneaux restent entre 6 h et minuit. Le delta décale tous les créneaux suivants de la journée, réservations actives et feed ICS inclus. `day_schedule` conserve les durées et une révision ; `booking.time` et `slot_exception.time` restent des identifiants de créneau stables, les API exposent les heures effectives.
 
 ### Cycle de vie d'une demande
 
-```
-cliente soumet
-      ↓
- [ pending ]   待确认
-   ↙       ↘
-approuve   refuse
-   ↓          ↓
-[ approved ]  [ declined ]
- 待付定金
-   ↓
-dépôt reçu, marqué à la main
-   ↓
-[ confirmed ]  已确认  →  écrit dans le calendrier
-   ↓
-annule → [ cancelled ] → le créneau revient au pool
+```text
+pending → confirmed | declined
+confirmed → cancelled
+pending depuis 24 heures → cancelled (automatique, notification Telegram)
 ```
 
 Ce que la cliente voit :
@@ -107,7 +98,7 @@ Ce que la cliente voit :
 |---|---|
 | aucun | disponible, couleur selon la formule |
 | `pending` | 审核中, non sélectionnable |
-| `approved` / `confirmed` | 已约, non sélectionnable |
+| `confirmed` | 已约, non sélectionnable |
 | `declined` / `cancelled` | disponible à nouveau |
 
 Un créneau déjà en `pending` ne peut pas recevoir de demande de secours.

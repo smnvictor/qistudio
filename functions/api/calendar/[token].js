@@ -1,3 +1,4 @@
+import { bookingTimes } from "../_schedule.js";
 import { config } from "../_config.js";
 
 function timingSafeEqual(a, b) {
@@ -29,10 +30,9 @@ export async function onRequestGet({ request, env, params }) {
     "CALSCALE:GREGORIAN"
   ];
 
-  for (const r of rows.results) {
-    const info = c.kind[r.k];
+  for (const r of await bookingTimes(env, c, rows.results)) {
     const start = new Date(r.d + "T" + r.t + ":00Z");
-    const end = new Date(start.getTime() + info.h * 3600000);
+    const end = new Date(start.getTime() + r.h * 3600000);
     lines.push(
       "BEGIN:VEVENT",
       "UID:" + r.id + "@qistudio",

@@ -19,3 +19,13 @@ CREATE TABLE slot_exception (
   time   TEXT,
   reason TEXT
 );
+
+CREATE TABLE day_schedule (
+  date TEXT PRIMARY KEY,
+  revision INTEGER NOT NULL DEFAULT 0,
+  durations TEXT NOT NULL DEFAULT '{}'
+);
+ALTER TABLE booking ADD COLUMN expired_at TEXT;
+ALTER TABLE booking ADD COLUMN expiry_notified_at TEXT;
+ALTER TABLE booking ADD COLUMN expiry_claimed_at TEXT;
+CREATE INDEX idx_pending_expiry ON booking(julianday(created_at)) WHERE status = 'pending';

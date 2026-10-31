@@ -1,203 +1,141 @@
-# Setup — Qistudio Paris
+# Déploiement — Qistudio Paris
 
-État couvert : le site complet, feed ICS et notifications Telegram inclus.
+## 1. Comptes et outils
 
-## 1. Comptes
+Créer un compte [GitHub](https://github.com/signup) et un compte [Cloudflare](https://dash.cloudflare.com/sign-up) gratuit.
+Installer Node.js 22 et Git, puis cloner le dépôt :
 
-- GitHub : https://github.com/signup
-- Cloudflare : https://dash.cloudflare.com/sign-up — plan gratuit, aucune carte bancaire
-
-## 2. Machine
-
-Node 20 ou plus, et git.
-
-```
-node --version
-git --version
-```
-
-## 3. Accès git
-
-Sans clé SSH existante :
-
-```
-ssh-keygen -t ed25519 -C "<ton-email>"
-cat ~/.ssh/id_ed25519.pub
-```
-
-Coller la clé sur https://github.com/settings/keys → **New SSH key**.
-
-Dans chaque terminal d'où tu pousses :
-
-```
-eval "$(ssh-agent -s)" && ssh-add ~/.ssh/id_ed25519
-```
-
-## 4. Repo
-
-Sur la page GitHub du projet : **Fork**. Puis :
-
-```
-git clone git@github.com:<ton-compte>/qistudio.git
+```sh
+git clone git@github.com:smnvictor/qistudio.git
 cd qistudio
-```
-
-## 5. Connexion Cloudflare
-
-```
 npx wrangler@latest login
 npx wrangler@latest whoami
 ```
 
-## 6. Base D1
+## 2. Base de données — première installation
 
-```
+```sh
 npx wrangler@latest d1 create qistudio-rdv-db --location=weur
 ```
 
-Reporter le `database_id` renvoyé dans `wrangler.toml`. Ne pas coller le bloc suggéré par wrangler tel quel : le binding doit rester `DB`, c'est le nom lu par les Functions.
+Reporter l’identifiant obtenu dans `wrangler.toml`, en conservant le binding `DB` et le nom `qistudio-rdv-db`.
 
-```toml
-[[d1_databases]]
-binding = "DB"
-database_name = "qistudio-rdv-db"
-database_id = "<le-tien>"
-```
-
-Appliquer le schéma sur la base distante :
-
-```
+```sh
 npx wrangler@latest d1 execute qistudio-rdv-db --remote --file schema.sql
 ```
 
-Pousser :
+Passer à la section 4. Ne pas appliquer la migration de la section 3 sur une base créée avec ce schéma.
 
-```
-git commit -am "database_id" && git push origin main
-```
+## 3. Base de données — mise à jour du site existant
 
-## 7. Projet Cloudflare Pages
+Depuis la version antérieure aux durées personnalisées et à l’expiration automatique, appliquer une seule fois cette migration **avant** de publier le nouveau site :
 
-Sur https://dash.cloudflare.com :
-
-1. **Workers & Pages** → **Create** → onglet **Pages** → **Connect to Git**
-2. Autoriser l'application GitHub Cloudflare Pages, cocher le dépôt `qistudio`
-3. **Project name** : `qistudio` — il détermine l'URL `qistudio.pages.dev`. S'il est déjà pris, choisir un autre nom ; l'URL devient `<nom>.pages.dev`
-4. **Production branch** : `main`
-5. **Framework preset** : `None`
-6. **Build command** : laisser vide
-7. **Build output directory** : `public`
-8. **Save and Deploy**
-
-Le binding D1 `DB` vient de `wrangler.toml` et n'est pas à créer dans le dashboard.
-
-## 8. Secrets
-
-```
-npx wrangler@latest pages secret put ADMIN_PASSWORD --project-name=qistudio
+```sh
+npx wrangler@latest d1 execute qistudio-rdv-db --remote --file migrations/0001_schedule_and_expiry.sql
 ```
 
-Saisir le mot de passe de Qizhi à l'invite. Ne pas reprendre `qistudio`, valeur d'exemple présente dans l'historique du dépôt.
+## 4. Projet Pages et secrets
 
-Générer le token du calendrier et le garder sous la main, il sert en section 10 :
+Pour une première installation :
 
+```sh
+npx wrangler@latest pages project create qistudio --production-branch main
 ```
+
+Sur un projet existant, conserver les secrets déjà définis.
+
+Définir le mot de passe administrateur :
+
+```sh
+npx wrangler@latest pages secret put ADMIN_PASSWORD --project-name qistudio
+```
+
+Générer le token du calendrier, le conserver pour l’abonnement, puis le saisir à l’invite :
+
+```sh
 openssl rand -hex 16
-npx wrangler@latest pages secret put ICS_TOKEN --project-name=qistudio
+npx wrangler@latest pages secret put ICS_TOKEN --project-name qistudio
 ```
 
-Coller la valeur générée à l'invite.
+Dans Telegram, ouvrir **@BotFather**, envoyer `/newbot`, choisir un nom et un identifiant se terminant par `bot`. Conserver le token renvoyé et le saisir à l’invite :
 
-Créer le bot Telegram : dans Telegram, ouvrir **@BotFather**, envoyer `/newbot`, choisir un nom et un identifiant se terminant par `bot`. BotFather renvoie le token.
-
-```
-npx wrangler@latest pages secret put TELEGRAM_BOT_TOKEN --project-name=qistudio
+```sh
+npx wrangler@latest pages secret put TELEGRAM_BOT_TOKEN --project-name qistudio
 ```
 
-Envoyer ensuite n'importe quel message au bot depuis le compte Telegram de Qizhi, puis relever le `chat_id` :
+Envoyer un message au nouveau bot depuis le compte administrateur, puis ouvrir `https://api.telegram.org/bot<TOKEN>/getUpdates` et relever `result[0].message.chat.id`. Saisir cet identifiant à l’invite :
 
-```
-curl "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/getUpdates"
-```
-
-Le nombre à récupérer est `result[0].message.chat.id`.
-
-```
-npx wrangler@latest pages secret put TELEGRAM_CHAT_ID --project-name=qistudio
+```sh
+npx wrangler@latest pages secret put TELEGRAM_CHAT_ID --project-name qistudio
 ```
 
-Puis redéployer pour que les secrets soient visibles des Functions :
+## 5. Publication du site
 
-```
-git commit --allow-empty -m "secrets" && git push origin main
+```sh
+npx wrangler@latest pages deploy public --project-name qistudio --branch main
 ```
 
-## 9. Vérification
+## 6. Annulation automatique et notification Telegram
 
+Vérifier `SITE_URL` dans `wrangler.expiry.toml` : `https://qistudio.pages.dev`.
+
+Publier le Worker planifié :
+
+```sh
+npx wrangler@latest deploy --config wrangler.expiry.toml
 ```
+
+Générer un secret partagé, puis saisir la même valeur aux deux invites :
+
+```sh
+openssl rand -hex 32
+npx wrangler@latest pages secret put EXPIRY_TOKEN --project-name qistudio
+npx wrangler@latest secret put EXPIRY_TOKEN --config wrangler.expiry.toml
+npx wrangler@latest pages deploy public --project-name qistudio --branch main
+```
+
+Le traitement utilise les identifiants Telegram déjà configurés sur Pages.
+
+Attendre jusqu’à 15 minutes pour l’activation initiale du déclencheur planifié.
+
+## 7. Vérification
+
+```sh
 curl https://qistudio.pages.dev/api/health
-curl "https://qistudio.pages.dev/api/month?m=$(date +%Y-%m)"
-npx wrangler@latest d1 execute qistudio-rdv-db --remote --command "SELECT name FROM sqlite_master"
+curl 'https://qistudio.pages.dev/api/month?m=2026-11'
 ```
 
-Attendu : `{"bookings":0}`, puis `{"bookings":[],"exceptions":[]}`, puis `booking`, `idx_slot_taken`, `slot_exception`.
+Ouvrir le site et vérifier les deux langues avec le bouton de langue. Se connecter depuis le bouton rond avec le mot de passe administrateur.
 
-Ouvrir https://qistudio.pages.dev : le calendrier du mois s'affiche, tous les créneaux disponibles. Les jours situés à plus de 31 jours de la date du jour sont grisés et ne réagissent pas au clic ; la flèche › s'arrête au mois contenant cette limite.
+Vérifier qu’un dimanche affiche 11 h simple, 13 h custom et 16 h simple ouverts par défaut, et 19 h custom fermé par défaut. En mode « Close slots », ouvrir puis refermer le créneau de 19 h. En mode « Close days », fermer puis rouvrir le dimanche entier.
 
-Toucher un créneau libre : il se déroule et affiche les styles inclus. Toucher 填写申请, remplir le formulaire, soumettre : le formulaire se ferme, une pop-up de remerciement affiche les contacts WeChat et Instagram, le créneau passe en 审核中 et la demande apparaît dans 我的申请. Toutes les pop-up se ferment en cliquant à côté.
+Activer « Adjust duration », choisir un créneau, ajouter 30 minutes et vérifier l’aperçu avant/après. Fermer sans enregistrer, puis refaire et enregistrer. Vérifier que les créneaux suivants sont décalés et que le changement persiste après rechargement.
 
-Le bouton 价格 en haut à droite ouvre les tarifs.
+Entre 00:00 et 06:00 à Paris, vérifier que les demandes sont refusées avec un message dans la langue affichée.
 
-Le bouton rond en haut à gauche ouvre la connexion admin. Le mot de passe est celui posé en section 8. Une fois connectée, la barre bordeaux en haut affiche le nombre de demandes en attente, et chaque demande du mois porte ses boutons 批准, 拒绝 et 取消. 批准 confirme directement le rendez-vous, qui part alors dans le feed ICS. Le bouton 关闭时段 fait basculer les créneaux au clic, 关闭日期 fait basculer les journées entières au clic.
+Dans Cloudflare → **Workers & Pages** → **qistudio-expiry** → **Settings** → **Trigger Events**, vérifier le cron `* * * * *`. Vérifier qu’une demande laissée en attente 24 heures passe en annulation et déclenche une notification Telegram avec identifiant, cliente, WeChat, date, heures, formule, durée, acompte, note et motif.
 
-## 10. Abonnement au calendrier
+## 8. Calendrier Apple
 
-L'URL du feed, avec le token de la section 8 :
+Avec le token conservé en section 4 :
 
-```
+```text
 webcal://qistudio.pages.dev/api/calendar/<ICS_TOKEN>.ics
 ```
 
-**iPhone** — Réglages → Apps → Calendrier → Comptes → Ajouter un compte → Autre → **Ajouter un abonnement à un calendrier**, coller l'URL, Suivant, Enregistrer.
+**iPhone** : Réglages → Apps → Calendrier → Comptes → Ajouter un compte → Autre → Ajouter un abonnement à un calendrier. Coller l’URL, Suivant, Enregistrer. Puis Réglages → Calendrier → Synchroniser → Tous les événements.
 
-Puis Réglages → Calendrier → Synchroniser → **Tous les événements**, sans quoi l'historique n'apparaît pas.
+**Mac** : Calendrier → Fichier → Nouvel abonnement à un calendrier. Coller l’URL, choisir « Sur mon Mac » et une actualisation toutes les 15 minutes.
 
-**Mac** — Calendrier → Fichier → **Nouvel abonnement au calendrier**, coller l'URL, Emplacement **Sur mon Mac** et non iCloud, Actualisation **toutes les 15 minutes**.
-
-Le rafraîchissement va de quinze minutes à plusieurs heures. Un pull-to-refresh dans l'app Calendrier force la mise à jour.
-
-## 11. Déploiements suivants
-
-```
-git push origin main
-```
-
----
+Laisser le calendrier se rafraîchir ou tirer la liste des événements vers le bas sur iPhone. Vérifier que les rendez-vous confirmés reflètent les horaires et les durées ajustés.
 
 ## Pour Qizhi
 
-**Changer de langue** — le bouton en haut à gauche bascule la page entre le chinois et l'anglais. Le bouton 价格 en haut à droite ouvre les tarifs.
-
-**Fenêtre de réservation** — les clientes ne peuvent réserver que dans les 31 jours qui viennent. Au-delà, les jours sont grisés et se rouvrent seuls au fil des jours.
-
-**Se connecter** — ouvrir qistudio.pages.dev, toucher le petit bouton rond en haut à gauche, à droite du bouton de langue, saisir le mot de passe. La barre bordeaux en haut indique que le mode administration est actif. Il reste actif un mois, même après avoir fermé le navigateur.
-
-**Traiter une demande** — les demandes du mois s'affichent sous le calendrier, les nouvelles en premier.
-
-- 批准 : le rendez-vous passe en 已确认 et apparaît dans le calendrier de l'iPhone
-- 拒绝 : le créneau redevient libre
-- 取消 : annule un rendez-vous confirmé, le créneau redevient libre
-
-**Fermer une journée** — toucher 关闭日期, puis toucher dans le calendrier les jours à fermer. Toucher un jour déjà fermé le rouvre. Un jour fermé n'affiche plus que des tirets gris et porte le badge 休息 quand on l'ouvre. Toucher 关闭日期 une seconde fois quitte ce mode.
-
-**Fermer un seul créneau** — toucher 关闭时段, puis toucher le créneau à fermer. Le toucher à nouveau le rouvre. Toucher 关闭时段 une seconde fois quitte ce mode.
-
-Les deux modes s'excluent : activer l'un désactive l'autre.
-
-Un créneau qui a déjà une demande ne peut pas être fermé : traiter la demande d'abord.
-
-**Lire le calendrier de l'iPhone** — chaque rendez-vous confirmé apparaît sur son créneau horaire sous la forme 💅 suivi de l'heure de début, sans autre détail.
-
-**Rafraîchir le calendrier de l'iPhone** — l'app Calendrier se met à jour toute seule, entre quinze minutes et quelques heures après un changement. Pour forcer : ouvrir l'app Calendrier, aller dans la liste des événements et tirer l'écran vers le bas.
-
-**Quitter le mode administration** — 退出 dans la barre bordeaux.
+- Le bouton de langue bascule entre le chinois et l’anglais. Le choix est mémorisé sur l’appareil.
+- Les demandes clientes sont ouvertes entre 6 h et minuit, heure de Paris, pour les 31 jours à venir.
+- Le dimanche, 11 h, 13 h et 16 h sont ouverts par défaut ; seul 19 h est fermé par défaut. « Close slots » permet d’ouvrir le créneau de 19 h ou de fermer un autre créneau ; « Close days » ouvre ou ferme une journée entière.
+- « Adjust duration » permet de choisir un créneau et de modifier sa durée par pas de 30 minutes. Vérifier l’aperçu, puis enregistrer. Les réservations déjà prises et le calendrier Apple suivent le décalage. Prévenir les clientes concernées par WeChat.
+- Les trois modes d’édition s’excluent. Fermer la fenêtre, toucher Annuler ou appuyer sur Échap quitte la modification sans enregistrer.
+- « Approve » valide une demande et l’ajoute au calendrier Apple ; « Decline » ou « Cancel » libère le créneau.
+- Après 24 heures sans confirmation, la demande est annulée. Le Worker vérifie chaque minute, même sans visite sur le site. Une notification Telegram identifie la demande annulée ; un envoi échoué est retenté au passage suivant.
+- « Log out » quitte le mode administration.

@@ -1,3 +1,5 @@
+import { config } from "../_config.js";
+import { bookingTimes } from "../_schedule.js";
 import { requireAdmin, unauthorized } from "./_auth.js";
 
 export async function onRequestGet({ request, env }) {
@@ -12,5 +14,5 @@ export async function onRequestGet({ request, env }) {
     "ORDER BY CASE status WHEN 'pending' THEN 0 ELSE 1 END, date, time"
   ).bind(m).all();
 
-  return Response.json({ bookings: r.results }, { headers: { "Cache-Control": "no-store" } });
+  return Response.json({ bookings: await bookingTimes(env, await config(request, env), r.results) }, { headers: { "Cache-Control": "no-store" } });
 }
